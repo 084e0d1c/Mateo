@@ -1,0 +1,66 @@
+# Author: @yarkhinephyo
+
+app: mateo-backend
+
+service: mateo-backend-auth
+
+provider:
+  name: aws
+  stage: dev
+  timeout: 10
+  runtime: python3.7
+  region: ap-southeast-1
+  memorySize: 2048
+  logRetentionInDays: 7
+  lambdaHashingVersion: 20201221
+  environment:
+    PYTHON_ENV: ${self:custom.stage}
+    COGNITO_CLIENT_ID: ${self:custom.cognitoClientId}
+    COGNITO_USERPOOL_ID: ${self:custom.cognitoUserpoolId}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - cognito-idp:SignUp
+            - cognito-idp:InitiateAuth
+            - cognito-idp:AdminGetUser
+            - cognito-idp:AdminUpdateUserAttributes
+            - cognito-idp:AdminDisableUser
+            - cognito-idp:AdminConfirmSignUp
+          Resource: '*'
+
+functions:
+  SignUp:
+    handler: auth.signup
+    events:
+      - http:
+          path: /v1/signup
+          method: post
+          cors:
+            origin: '*'
+            headers: '*'
+            methods:
+              - POST
+              - OPTIONS
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+
+  # Required for authorizing accessTokens from Cognito
+  cognitoArn: ${ssm:/${self:custom.stage}/cognito/arn}
+  cognitoClientId: ${ssm:/${self:custom.stage}/cognito/clientId}
+
+  # Required for retrieving user details from Cognito
+  cognitoUserpoolId: ${ssm:/${self:custom.stage}/cognito/poolId}
+
+  # Compile non-pure python modules on non-linux OSs via Docker
+  pythonRequirements:
+    dockerizePip: true
+
+plugins:
+  - serverless-python-requirements
+
+package:
+  patterns:
+    - '!node_modules/**'
