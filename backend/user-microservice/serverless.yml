@@ -2,7 +2,7 @@
 
 app: mateo-backend
 
-service: mateo-backend-auth
+service: mateo-backend-user
 
 provider:
   name: aws
@@ -30,7 +30,7 @@ functions:
     handler: signup.main
     events:
       - http:
-          path: /auth/signup
+          path: /user/signup
           method: post
           cors:
             origin: '*'
@@ -43,7 +43,7 @@ functions:
     handler: login.main
     events:
       - http:
-          path: /auth/login
+          path: /user/login
           method: post
           cors:
             origin: '*'
