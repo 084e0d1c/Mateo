@@ -29,18 +29,30 @@ def main(event, context):
     username = body["username"]
 
     # Logs in user for Cognito
-    response = cognito_client.initiate_auth(
-        AuthFlow='USER_PASSWORD_AUTH',
-        AuthParameters={
-            'USERNAME': username,
-            'PASSWORD': password
-        },
-        ClientId=os.environ['COGNITO_CLIENT_ID'],
-    )
+    try:
+        response = cognito_client.initiate_auth(
+            AuthFlow='USER_PASSWORD_AUTH',
+            AuthParameters={
+                'USERNAME': username,
+                'PASSWORD': password
+            },
+            ClientId=os.environ['COGNITO_CLIENT_ID'],
+        )
+    except:
+        return {
+            "statusCode": "401",
+            "body": json.dumps({
+                "message": "incorrect username or password"
+            }),
+            "headers": {'Access-Control-Allow-Origin': "*"}
+        } 
 
     # Returns the accessToken for authorized requests
     return {
         "statusCode": "200",
-        "body": json.dumps(response['AuthenticationResult']),
+        "body": json.dumps({
+            "message": "success",
+            "body": response['AuthenticationResult']
+        }),
         "headers": {'Access-Control-Allow-Origin': "*"}
     }

@@ -44,6 +44,8 @@ def main(event, context):
             ],
         )
     except Exception as err:
+        if 'UsernameExistsException' in str(err):
+            err = 'username already exists'
         return {
             "statusCode": "400",
             "body": json.dumps({
