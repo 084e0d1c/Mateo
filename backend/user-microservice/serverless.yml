@@ -1,0 +1,77 @@
+# Author: @yarkhinephyo
+
+app: mateo-backend
+
+service: mateo-backend-user
+
+provider:
+  name: aws
+  stage: dev
+  timeout: 10
+  runtime: python3.7
+  region: ap-southeast-1
+  memorySize: 2048
+  logRetentionInDays: 7
+  lambdaHashingVersion: 20201221
+  environment:
+    PYTHON_ENV: ${self:custom.stage}
+    COGNITO_CLIENT_ID: ${self:custom.cognitoClientId}
+    COGNITO_USERPOOL_ID: ${self:custom.cognitoUserpoolId}
+    USER_DATABASE_NAME: ${self:custom.userDatabaseName}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action: '*'
+          Resource: '*'
+
+functions:
+  SignUp:
+    handler: signup.main
+    events:
+      - http:
+          path: /user/signup
+          method: post
+          cors:
+            origin: '*'
+            headers: '*'
+            methods:
+              - POST
+              - OPTIONS
+
+  LogIn:
+    handler: login.main
+    events:
+      - http:
+          path: /user/login
+          method: post
+          cors:
+            origin: '*'
+            headers: '*'
+            methods:
+              - POST
+              - OPTIONS
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+
+  # Required for authorizing accessTokens from Cognito
+  cognitoArn: ${ssm:/${self:custom.stage}/cognito/arn}
+  cognitoClientId: ${ssm:/${self:custom.stage}/cognito/clientId}
+
+  # Required for retrieving user details from Cognito
+  cognitoUserpoolId: ${ssm:/${self:custom.stage}/cognito/poolId}
+
+  userDatabaseName: ${ssm:/${self:custom.stage}/dynamodb/user/name}
+  userDatabaseArn: ${ssm:/${self:custom.stage}/dynamodb/user/arn}
+
+  # Compile non-pure python modules on non-linux OSs via Docker
+  pythonRequirements:
+    dockerizePip: true
+
+plugins:
+  - serverless-python-requirements
+
+package:
+  patterns:
+    - '!node_modules/**'
