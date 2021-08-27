@@ -49,6 +49,22 @@ functions:
           path: /user/plaid-link-token
           method: get
           cors: true
+          authorizer:
+            arn: ${self:custom.cognitoArn}
+            scopes:
+              - aws.cognito.signin.user.admin
+
+  AddPublicToken:
+    handler: add_public_token.main
+    events:
+      - http:
+          path: /user/plaid-public-token
+          method: post
+          cors: true
+          authorizer:
+            arn: ${self:custom.cognitoArn}
+            scopes:
+              - aws.cognito.signin.user.admin
 
 custom:
   stage: ${opt:stage, self:provider.stage}

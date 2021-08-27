@@ -34,9 +34,7 @@ def get_access_token(public_token: str) -> str:
 def get_plaid_link_token(username: str) -> str:
   request = LinkTokenCreateRequest(
     products=[Products('auth'), Products('transactions')],
-    client_id=CLIENT_ID,
     client_name='Mateo',
-    secret=get_plaid_key(),
     country_codes=[CountryCode('GB'), CountryCode('US')],
     language='en',
     user=LinkTokenCreateRequestUser(

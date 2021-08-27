@@ -22,17 +22,14 @@ def main(event, context):
       }
 
   """
-  print(event)
   cognito_access_token = event['headers']["Authorization"].split(" ")[1]
   username = jwt.decode(cognito_access_token, options={"verify_signature": False})["username"]
-
-  print(username)
 
   return {
     "statusCode": "200",
     "body": json.dumps({
       "message": "success",
-      "body": {
+      "data": {
         "link_token": get_plaid_link_token(username)
       }
     }),
