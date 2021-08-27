@@ -4,7 +4,7 @@ import os
 import json
 from utils import exception_handler
 
-client = boto3.client('cognito-idp', region_name='ap-southeast-1')
+cognito_client = boto3.client('cognito-idp', region_name='ap-southeast-1')
 
 @exception_handler
 def main(event, context):
@@ -29,7 +29,7 @@ def main(event, context):
     username = body["username"]
 
     # Logs in user for Cognito
-    response = client.initiate_auth(
+    response = cognito_client.initiate_auth(
         AuthFlow='USER_PASSWORD_AUTH',
         AuthParameters={
             'USERNAME': username,
@@ -38,6 +38,7 @@ def main(event, context):
         ClientId=os.environ['COGNITO_CLIENT_ID'],
     )
 
+    # Returns the accessToken for authorized requests
     return {
         "statusCode": "200",
         "body": json.dumps(response['AuthenticationResult']),

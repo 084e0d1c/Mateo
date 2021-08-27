@@ -8,8 +8,8 @@ def exception_handler(handler):
             return handler(*args, **kwargs)
         except Exception as err:
             return {
-                "statusCode": "400",
-                "body": "Error: " + str(err),
+                "statusCode": "500",
+                "body": "Internal Error: " + str(err),
                 "headers": {'Access-Control-Allow-Origin': "*"}
             }
 

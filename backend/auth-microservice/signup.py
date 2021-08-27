@@ -4,7 +4,8 @@ import os
 import json
 from utils import exception_handler
 
-client = boto3.client('cognito-idp', region_name='ap-southeast-1')
+cognito_client = boto3.client('cognito-idp', region_name='ap-southeast-1')
+db_client = boto3.client('dynamodb')
 
 @exception_handler
 def main(event, context):
@@ -30,27 +31,53 @@ def main(event, context):
     username = body["username"]
 
     # Signs up in Cognito
-    response = client.sign_up(
-        ClientId=os.environ['COGNITO_CLIENT_ID'],
-        Username=username,
-        Password=password,
-        UserAttributes=[
-            {
-                'Name': 'email',
-                'Value': email
-            },
-        ],
-    )
+    try:
+        response = cognito_client.sign_up(
+            ClientId=os.environ['COGNITO_CLIENT_ID'],
+            Username=username,
+            Password=password,
+            UserAttributes=[
+                {
+                    'Name': 'email',
+                    'Value': email
+                },
+            ],
+        )
+    except Exception as err:
+        return {
+            "statusCode": "400",
+            "body": json.dumps({
+                "message": str(err)
+            }),
+            "headers": {'Access-Control-Allow-Origin': "*"}
+        }
 
-    # Verifies the email automatically
-    # If not user cannot log in
-    # This is for prototyping purpose
-    response = client.admin_confirm_sign_up(
+    # Verifies the email automatically. If not user cannot log in
+    response = cognito_client.admin_confirm_sign_up(
         UserPoolId=os.environ['COGNITO_USERPOOL_ID'],
         Username=username
     )
 
+    #
     # TODO: Save additional attributes to DynamoDB if necessary
+    #
+    try:
+        response = db_client.put_item(
+            TableName=os.environ['USER_DATABASE_NAME'],
+            Item={
+                'username': {
+                    'S': username
+                }
+            }
+        )   
+    except Exception as err:
+        return {
+            "statusCode": "400",
+            "body": json.dumps({
+                "message": str(err)
+            }),
+            "headers": {'Access-Control-Allow-Origin': "*"}
+        }
 
 
     return {

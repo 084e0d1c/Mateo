@@ -17,17 +17,12 @@ provider:
     PYTHON_ENV: ${self:custom.stage}
     COGNITO_CLIENT_ID: ${self:custom.cognitoClientId}
     COGNITO_USERPOOL_ID: ${self:custom.cognitoUserpoolId}
+    USER_DATABASE_NAME: ${self:custom.userDatabaseName}
   iam:
     role:
       statements:
         - Effect: Allow
-          Action:
-            - cognito-idp:SignUp
-            - cognito-idp:InitiateAuth
-            - cognito-idp:AdminGetUser
-            - cognito-idp:AdminUpdateUserAttributes
-            - cognito-idp:AdminDisableUser
-            - cognito-idp:AdminConfirmSignUp
+          Action: '*'
           Resource: '*'
 
 functions:
@@ -66,6 +61,9 @@ custom:
 
   # Required for retrieving user details from Cognito
   cognitoUserpoolId: ${ssm:/${self:custom.stage}/cognito/poolId}
+
+  userDatabaseName: ${ssm:/${self:custom.stage}/dynamodb/user/name}
+  userDatabaseArn: ${ssm:/${self:custom.stage}/dynamodb/user/arn}
 
   # Compile non-pure python modules on non-linux OSs via Docker
   pythonRequirements:
