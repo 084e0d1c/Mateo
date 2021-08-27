@@ -32,10 +32,23 @@ provider:
 
 functions:
   SignUp:
-    handler: auth.signup
+    handler: signup.main
     events:
       - http:
-          path: /v1/signup
+          path: /auth/signup
+          method: post
+          cors:
+            origin: '*'
+            headers: '*'
+            methods:
+              - POST
+              - OPTIONS
+
+  LogIn:
+    handler: login.main
+    events:
+      - http:
+          path: /auth/login
           method: post
           cors:
             origin: '*'

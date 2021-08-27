@@ -117,6 +117,13 @@
               "RetentionInDays": 7
             }
           },
+          "LogInLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/mateo-backend-auth-dev-LogIn",
+              "RetentionInDays": 7
+            }
+          },
           "IamRoleLambdaExecution": {
             "Type": "AWS::IAM::Role",
             "Properties": {
@@ -204,9 +211,9 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/mateo-backend-auth/dev/1630061720538-2021-08-27T10:55:20.538Z/mateo-backend-auth.zip"
+                "S3Key": "serverless/mateo-backend-auth/dev/1630062549528-2021-08-27T11:09:09.528Z/mateo-backend-auth.zip"
               },
-              "Handler": "auth.signup",
+              "Handler": "signup.main",
               "Runtime": "python3.7",
               "FunctionName": "mateo-backend-auth-dev-SignUp",
               "MemorySize": 2048,
@@ -229,14 +236,56 @@
               "SignUpLogGroup"
             ]
           },
-          "SignUpLambdaVersionFFa4sVOl9b8Z7bquzKlxdGR7FssJXwnEhhdi7pRv06w": {
+          "LogInLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/mateo-backend-auth/dev/1630062549528-2021-08-27T11:09:09.528Z/mateo-backend-auth.zip"
+              },
+              "Handler": "login.main",
+              "Runtime": "python3.7",
+              "FunctionName": "mateo-backend-auth-dev-LogIn",
+              "MemorySize": 2048,
+              "Timeout": 10,
+              "Environment": {
+                "Variables": {
+                  "PYTHON_ENV": "dev",
+                  "COGNITO_CLIENT_ID": "6l4l0pvugnu5romlbf3i7s2aj5",
+                  "COGNITO_USERPOOL_ID": "ap-southeast-1_XBjCYywqC"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "LogInLogGroup"
+            ]
+          },
+          "SignUpLambdaVersioncQuHbrwhTFlChWv4RtTQJVNh67kZJipHTk6OaplZ4WM": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "SignUpLambdaFunction"
               },
-              "CodeSha256": "2YmRUObrvkYqG4m/nMaRMepZgXUoFRim1EqQz5Ufprg="
+              "CodeSha256": "GfHaksnAsHfMupnQaEHh5s1B94xZRA/uMGkUSQsnjWY="
+            }
+          },
+          "LogInLambdaVersionFpVk9ca2RwjSDBC3EEbdN5Delq28dSBrNyNM8ifcc6k": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "LogInLambdaFunction"
+              },
+              "CodeSha256": "GfHaksnAsHfMupnQaEHh5s1B94xZRA/uMGkUSQsnjWY="
             }
           },
           "ApiGatewayRestApi": {
@@ -251,7 +300,7 @@
               "Policy": ""
             }
           },
-          "ApiGatewayResourceV1": {
+          "ApiGatewayResourceAuth": {
             "Type": "AWS::ApiGateway::Resource",
             "Properties": {
               "ParentId": {
@@ -260,17 +309,17 @@
                   "RootResourceId"
                 ]
               },
-              "PathPart": "v1",
+              "PathPart": "auth",
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               }
             }
           },
-          "ApiGatewayResourceV1Signup": {
+          "ApiGatewayResourceAuthSignup": {
             "Type": "AWS::ApiGateway::Resource",
             "Properties": {
               "ParentId": {
-                "Ref": "ApiGatewayResourceV1"
+                "Ref": "ApiGatewayResourceAuth"
               },
               "PathPart": "signup",
               "RestApiId": {
@@ -278,7 +327,19 @@
               }
             }
           },
-          "ApiGatewayMethodV1SignupOptions": {
+          "ApiGatewayResourceAuthLogin": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceAuth"
+              },
+              "PathPart": "login",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodAuthSignupOptions": {
             "Type": "AWS::ApiGateway::Method",
             "Properties": {
               "AuthorizationType": "NONE",
@@ -316,20 +377,65 @@
                 ]
               },
               "ResourceId": {
-                "Ref": "ApiGatewayResourceV1Signup"
+                "Ref": "ApiGatewayResourceAuthSignup"
               },
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               }
             }
           },
-          "ApiGatewayMethodV1SignupPost": {
+          "ApiGatewayMethodAuthLoginOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'*'",
+                      "method.response.header.Access-Control-Allow-Methods": "'POST,OPTIONS'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceAuthLogin"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodAuthSignupPost": {
             "Type": "AWS::ApiGateway::Method",
             "Properties": {
               "HttpMethod": "POST",
               "RequestParameters": {},
               "ResourceId": {
-                "Ref": "ApiGatewayResourceV1Signup"
+                "Ref": "ApiGatewayResourceAuthSignup"
               },
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
@@ -369,7 +475,53 @@
               "SignUpLambdaPermissionApiGateway"
             ]
           },
-          "ApiGatewayDeployment1630061715935": {
+          "ApiGatewayMethodAuthLoginPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "POST",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceAuthLogin"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "LogInLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "LogInLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayDeployment1630062545022": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -378,8 +530,10 @@
               "StageName": "dev"
             },
             "DependsOn": [
-              "ApiGatewayMethodV1SignupOptions",
-              "ApiGatewayMethodV1SignupPost"
+              "ApiGatewayMethodAuthSignupOptions",
+              "ApiGatewayMethodAuthLoginOptions",
+              "ApiGatewayMethodAuthSignupPost",
+              "ApiGatewayMethodAuthLoginPost"
             ]
           },
           "SignUpLambdaPermissionApiGateway": {
@@ -388,6 +542,43 @@
               "FunctionName": {
                 "Fn::GetAtt": [
                   "SignUpLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "LogInLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "LogInLambdaFunction",
                   "Arn"
                 ]
               },
@@ -432,10 +623,19 @@
           "SignUpLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "SignUpLambdaVersionFFa4sVOl9b8Z7bquzKlxdGR7FssJXwnEhhdi7pRv06w"
+              "Ref": "SignUpLambdaVersioncQuHbrwhTFlChWv4RtTQJVNh67kZJipHTk6OaplZ4WM"
             },
             "Export": {
               "Name": "sls-mateo-backend-auth-dev-SignUpLambdaFunctionQualifiedArn"
+            }
+          },
+          "LogInLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "LogInLambdaVersionFpVk9ca2RwjSDBC3EEbdN5Delq28dSBrNyNM8ifcc6k"
+            },
+            "Export": {
+              "Name": "sls-mateo-backend-auth-dev-LogInLambdaFunctionQualifiedArn"
             }
           },
           "ServiceEndpoint": {
@@ -565,11 +765,11 @@
     "pluginsData": {},
     "functions": {
       "SignUp": {
-        "handler": "auth.signup",
+        "handler": "signup.main",
         "events": [
           {
             "http": {
-              "path": "v1/signup",
+              "path": "auth/signup",
               "method": "post",
               "cors": {
                 "origin": "*",
@@ -592,7 +792,37 @@
         "timeout": 10,
         "runtime": "python3.7",
         "vpc": {},
-        "versionLogicalId": "SignUpLambdaVersionFFa4sVOl9b8Z7bquzKlxdGR7FssJXwnEhhdi7pRv06w"
+        "versionLogicalId": "SignUpLambdaVersioncQuHbrwhTFlChWv4RtTQJVNh67kZJipHTk6OaplZ4WM"
+      },
+      "LogIn": {
+        "handler": "login.main",
+        "events": [
+          {
+            "http": {
+              "path": "auth/login",
+              "method": "post",
+              "cors": {
+                "origin": "*",
+                "headers": [
+                  "*"
+                ],
+                "methods": [
+                  "POST",
+                  "OPTIONS"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "mateo-backend-auth-dev-LogIn",
+        "package": {},
+        "memory": 2048,
+        "timeout": 10,
+        "runtime": "python3.7",
+        "vpc": {},
+        "versionLogicalId": "LogInLambdaVersionFpVk9ca2RwjSDBC3EEbdN5Delq28dSBrNyNM8ifcc6k"
       }
     },
     "configValidationMode": "warn",
@@ -619,7 +849,7 @@
           "!node_modules/**"
         ],
         "artifact": "C:\\Users\\yarkh\\Desktop\\CS\\PROJECTS\\Mateo\\backend\\auth-microservice\\.serverless\\mateo-backend-auth.zip",
-        "artifactDirectoryName": "serverless/mateo-backend-auth/dev/1630061720538-2021-08-27T10:55:20.538Z"
+        "artifactDirectoryName": "serverless/mateo-backend-auth/dev/1630062549528-2021-08-27T11:09:09.528Z"
       }
     },
     "app": "mateo-backend",
@@ -628,7 +858,7 @@
     "artifact": "C:\\Users\\yarkh\\Desktop\\CS\\PROJECTS\\Mateo\\backend\\auth-microservice\\.serverless\\mateo-backend-auth.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/mateo-backend-auth/dev/1630061720538-2021-08-27T10:55:20.538Z",
+    "artifactDirectoryName": "serverless/mateo-backend-auth/dev/1630062549528-2021-08-27T11:09:09.528Z",
     "artifact": "mateo-backend-auth.zip"
   }
 }

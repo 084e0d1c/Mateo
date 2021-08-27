@@ -2,29 +2,12 @@ import boto3
 
 import os
 import json
-from functools import wraps
-from json import JSONDecodeError
-
-# Returns errors in response for easier debugging
-def exception_handler(handler):
-    @wraps(handler)
-    def handler_with_exception(*args, **kwargs):
-        try:
-            return handler(*args, **kwargs)
-        except Exception as err:
-            return {
-                "statusCode": "400",
-                "body": "Error: " + str(err),
-                "headers": {'Access-Control-Allow-Origin': "*"}
-            }
-
-    return handler_with_exception
-
+from utils import exception_handler
 
 client = boto3.client('cognito-idp', region_name='ap-southeast-1')
 
 @exception_handler
-def signup(event, context):
+def main(event, context):
     """
     Signs up user in Cognito
 
