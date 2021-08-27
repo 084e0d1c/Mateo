@@ -32,12 +32,7 @@ functions:
       - http:
           path: /user/signup
           method: post
-          cors:
-            origin: '*'
-            headers: '*'
-            methods:
-              - POST
-              - OPTIONS
+          cors: true
 
   LogIn:
     handler: login.main
@@ -45,12 +40,31 @@ functions:
       - http:
           path: /user/login
           method: post
-          cors:
-            origin: '*'
-            headers: '*'
-            methods:
-              - POST
-              - OPTIONS
+          cors: true
+
+  GetLinkToken:
+    handler: get_link_token.main
+    events:
+      - http:
+          path: /user/plaid-link-token
+          method: get
+          cors: true
+          authorizer:
+            arn: ${self:custom.cognitoArn}
+            scopes:
+              - aws.cognito.signin.user.admin
+
+  AddPublicToken:
+    handler: add_public_token.main
+    events:
+      - http:
+          path: /user/plaid-public-token
+          method: post
+          cors: true
+          authorizer:
+            arn: ${self:custom.cognitoArn}
+            scopes:
+              - aws.cognito.signin.user.admin
 
 custom:
   stage: ${opt:stage, self:provider.stage}
