@@ -3,6 +3,7 @@ import boto3
 import os
 import json
 from utils import exception_handler
+from plaid_utils import get_access_token
 
 cognito_client = boto3.client('cognito-idp', region_name='ap-southeast-1')
 db_client = boto3.client('dynamodb')
@@ -29,6 +30,7 @@ def main(event, context):
     email = body["email"]
     password = body["password"]
     username = body["username"]
+    phone = body["phone"]
 
     # Signs up in Cognito
     try:
@@ -69,6 +71,9 @@ def main(event, context):
             Item={
                 'username': {
                     'S': username
+                },
+                'phone': {
+                    'S': phone
                 }
             }
         )   

@@ -32,12 +32,7 @@ functions:
       - http:
           path: /user/signup
           method: post
-          cors:
-            origin: '*'
-            headers: '*'
-            methods:
-              - POST
-              - OPTIONS
+          cors: true
 
   LogIn:
     handler: login.main
@@ -45,12 +40,15 @@ functions:
       - http:
           path: /user/login
           method: post
-          cors:
-            origin: '*'
-            headers: '*'
-            methods:
-              - POST
-              - OPTIONS
+          cors: true
+
+  GetLinkToken:
+    handler: get_link_token.main
+    events:
+      - http:
+          path: /user/plaid-link-token
+          method: get
+          cors: true
 
 custom:
   stage: ${opt:stage, self:provider.stage}
