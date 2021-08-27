@@ -1,0 +1,14 @@
+{
+  "name": "mateo-backend",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "yarkhinephyo",
+  "license": "ISC",
+  "dependencies": {
+    "serverless": "^2.56.0",
+    "serverless-python-requirements": "^5.1.1"
+  }
+}

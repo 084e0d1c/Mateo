@@ -1,0 +1,176 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "The AWS CloudFormation template for this Serverless application",
+  "Resources": {
+    "ServerlessDeploymentBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ServerlessDeploymentBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "ServerlessDeploymentBucket"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "ServerlessDeploymentBucket"
+                      },
+                      "/*"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "ServerlessDeploymentBucket"
+                      }
+                    ]
+                  ]
+                }
+              ],
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": false
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "CognitoUserPool": {
+      "Type": "AWS::Cognito::UserPool",
+      "Properties": {
+        "UserPoolName": "mateo-backend-cognito-dev-user-pool",
+        "AliasAttributes": [
+          "email"
+        ],
+        "AutoVerifiedAttributes": [
+          "email"
+        ],
+        "Policies": {
+          "PasswordPolicy": {
+            "MinimumLength": 8
+          }
+        },
+        "EmailConfiguration": {
+          "EmailSendingAccount": "COGNITO_DEFAULT"
+        },
+        "Schema": [
+          {
+            "Name": "role",
+            "Mutable": true,
+            "AttributeDataType": "String"
+          }
+        ]
+      }
+    },
+    "CognitoUserPoolClient": {
+      "Type": "AWS::Cognito::UserPoolClient",
+      "Properties": {
+        "ClientName": "mateo-backend-cognito-dev-client",
+        "GenerateSecret": false,
+        "ExplicitAuthFlows": [
+          "ALLOW_USER_PASSWORD_AUTH",
+          "ALLOW_REFRESH_TOKEN_AUTH"
+        ],
+        "AccessTokenValidity": 24,
+        "IdTokenValidity": 24,
+        "RefreshTokenValidity": 365,
+        "TokenValidityUnits": {
+          "AccessToken": "hours",
+          "IdToken": "hours",
+          "RefreshToken": "days"
+        },
+        "UserPoolId": {
+          "Ref": "CognitoUserPool"
+        }
+      }
+    },
+    "SSMParameterCognitoUserPoolArn": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "/dev/cognito/arn",
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": [
+            "CognitoUserPool",
+            "Arn"
+          ]
+        },
+        "Tags": {
+          "Environment": "dev"
+        }
+      }
+    },
+    "SSMParameterCognitoUserPoolClientId": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "/dev/cognito/clientId",
+        "Type": "String",
+        "Value": {
+          "Ref": "CognitoUserPoolClient"
+        },
+        "Tags": {
+          "Environment": "dev"
+        }
+      }
+    },
+    "SSMParameterCognitoUserPoolId": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "/dev/cognito/poolId",
+        "Type": "String",
+        "Value": {
+          "Ref": "CognitoUserPool"
+        },
+        "Tags": {
+          "Environment": "dev"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "ServerlessDeploymentBucketName": {
+      "Value": {
+        "Ref": "ServerlessDeploymentBucket"
+      },
+      "Export": {
+        "Name": "sls-mateo-backend-cognito-dev-ServerlessDeploymentBucketName"
+      }
+    }
+  }
+}
