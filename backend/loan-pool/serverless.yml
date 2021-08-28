@@ -142,6 +142,7 @@ custom:
 
 plugins:
   - serverless-python-requirements
+  - serverless-prune-plugin
 
 package:
   patterns:

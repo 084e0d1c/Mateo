@@ -1,7 +1,9 @@
-import json
+import simplejson as json
+
 import boto3
-from utils import exception_handler, decode_username
 from dynamo_utils import check_pool_eligibility
+from utils import decode_username, exception_handler
+
 
 @exception_handler
 def main(event, context):

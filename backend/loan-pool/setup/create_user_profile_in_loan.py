@@ -1,6 +1,7 @@
 import json
-from os import environ
 from decimal import Decimal
+from os import environ
+
 import boto3
 from utils import exception_handler
 
@@ -37,7 +38,7 @@ def main(event, context):
         "username": username,
         "max_loan_amount": Decimal("0"),
         "outstanding_loan_amount": Decimal("0"),
-        "credit_rating": "C",
+        "credit_rating": "CC",
         "deposits_to_pools": {},
         "loaning_toggle": False
     }

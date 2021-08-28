@@ -1,10 +1,13 @@
 import json
-from os import environ
-import boto3
 from decimal import Decimal
-from utils import exception_handler, decode_username
+from os import environ
+
+import boto3
+from dynamo_utils import (create_transaction_receipt,
+                          get_available_for_redemption, process_redemption)
 from internal_lambda_invoke_utils import invoke_transfer_lambda
-from dynamo_utils import get_available_for_redemption, create_transaction_receipt, process_redemption
+from utils import decode_username, exception_handler
+
 
 @exception_handler
 def main(event, context):

@@ -7,8 +7,9 @@ from os import environ
 
 import boto3
 
-from internal_lambda_invoke_utils import invoke_transfer_lambda, invoke_compute_credit_score_lambda
-from utils import CreditDebit, CreditRating
+from internal_lambda_invoke_utils import (invoke_compute_credit_score_lambda,
+                                          invoke_transfer_lambda)
+from utils import CreditRating
 
 dynamodb = boto3.resource('dynamodb', region_name='ap-southeast-1')
 transaction_table = dynamodb.Table(environ.get('TRANSACTION_HISTORY_DATABASE_NAME'))
@@ -29,17 +30,27 @@ def scan_all_pools():
     return pool_table.scan()['Items']
 
 def check_pool_eligibility(username, pool_id):
-    user_detail = loan_table.get_item(Key={"user_id": username})['Item']['user_details']
+    user_detail = loan_table.get_item(Key={"username": username})['Item']
     
     # Get pool details
-    pool_detail = pool_table.get_item(Key={'pool_id':pool_id})['Item']['pool_details']
+    pool_detail = pool_table.get_item(Key={'pool_id':pool_id})['Item']
+    
+    # By default cannot loan unless credit passes
+    pool_detail['loan'] = False
+    
+    # By default can't deposit if you have an existing loan
+    pool_detail['deposit'] = True
     
     # Business Logic: Check if eligible for loan
     if CreditRating[user_detail['credit_rating']] >= CreditRating[pool_detail['credit_rating_requirement']]:
         pool_detail['loan'] = True
         pool_detail['max_loan_amount'] = user_detail['max_loan_amount'] - user_detail['outstanding_loan_amount']
-        
-    pool_detail['contribution_distribution'] = "" # mask the contribution
+
+    if user_detail['outstanding_loan_amount'] > 0:
+        pool_detail['deposit'] = False
+    
+    # Mask the contribution from requestors
+    pool_detail['contribution_distribution'] = ""
     return pool_detail
     
 

@@ -1,4 +1,4 @@
-from functools import wraps
+from functools import wraps, total_ordering
 from enum import Enum
 import jwt
 
@@ -30,18 +30,15 @@ def decode_username(event):
     username = jwt.decode(cognito_access_token, options={"verify_signature": False})["username"]
     return username
 
-class CreditDebit(Enum):
-    CREDIT = -1
-    DEBIT = 1
-    
-    def __mul__(self, other):
-        return self.value * other
-    
+@total_ordering
 class CreditRating(Enum):
     AA = 3
     BB = 2
     CC = 1
     
     def __lt__(self, other):
-        return self.value < other.value
+        # We can safely only consider the comparison between
+        # CreditRating Enums.
+        if self.__class__ is other.__class__:
+            return self.value < other.value
     

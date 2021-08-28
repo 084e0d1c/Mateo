@@ -1,6 +1,7 @@
-import boto3
-from os import environ
 import json
+from os import environ
+
+import boto3
 
 lambda_client = boto3.client('lambda', region_name='ap-southeast-1')
 

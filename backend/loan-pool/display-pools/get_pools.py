@@ -1,9 +1,10 @@
-import simplejson as json
 from os import environ
 
 import boto3
-from utils import exception_handler, decode_username
+import simplejson as json
 from dynamo_utils import scan_all_pools
+from utils import decode_username, exception_handler
+
 
 @exception_handler
 def main(event, context):

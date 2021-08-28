@@ -1,9 +1,10 @@
 import json
-from os import environ
 from decimal import Decimal
+from os import environ
+
 import boto3
-from utils import exception_handler, decode_username
 from dynamo_utils import scan_all_pools
+from utils import decode_username, exception_handler
 
 dynamodb = boto3.resource('dynamodb', region_name='ap-southeast-1')
 pool_table = dynamodb.Table(environ.get('POOL_DATABASE_NAME'))

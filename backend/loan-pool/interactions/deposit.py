@@ -1,8 +1,8 @@
 import json
+from decimal import Decimal
 from os import environ
 
 import boto3
-from decimal import Decimal
 from dynamo_utils import (create_transaction_receipt,
                           update_user_pool_contribution)
 from utils import decode_username, exception_handler

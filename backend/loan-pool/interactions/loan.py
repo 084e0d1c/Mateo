@@ -1,10 +1,12 @@
 import json
+from decimal import Decimal
 from os import environ
+
 import boto3
 import jwt
-from decimal import Decimal
-from utils import exception_handler, decode_username
-from dynamo_utils import create_transaction_receipt, get_max_loan, update_user_in_loan_and_pool_balance, process_loan
+from dynamo_utils import (create_transaction_receipt, get_max_loan,
+                          process_loan, update_user_in_loan_and_pool_balance)
+from utils import decode_username, exception_handler
 
 lambda_client = boto3.client('lambda', region_name='ap-southeast-1')
 
