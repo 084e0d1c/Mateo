@@ -45,7 +45,7 @@ def main(event, context):
           'S': username
         }
       },
-      UpdateExpression='SET access_token = :access_token, account_id: :account_id',
+      UpdateExpression='SET access_token = :access_token, account_id = :account_id',
       ExpressionAttributeValues={
         ':access_token': {
           'S': plaid_access_token
