@@ -18,6 +18,7 @@ provider:
     COGNITO_CLIENT_ID: ${self:custom.cognitoClientId}
     COGNITO_USERPOOL_ID: ${self:custom.cognitoUserpoolId}
     USER_DATABASE_NAME: ${self:custom.userDatabaseName}
+    COMPUTE_USER_LOAN_PROFILE_LAMBDA: ${self:custom.computeUserLoanProfileLambda}
   iam:
     role:
       statements:
@@ -93,6 +94,8 @@ custom:
 
   userDatabaseName: ${ssm:/${self:custom.stage}/dynamodb/user/name}
   userDatabaseArn: ${ssm:/${self:custom.stage}/dynamodb/user/arn}
+
+  computeUserLoanProfileLambda: mateo-backend-loan-pool-${self:custom.stage}-CreateUserLoanProfile
 
   # Compile non-pure python modules on non-linux OSs via Docker
   pythonRequirements:

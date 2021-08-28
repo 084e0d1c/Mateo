@@ -3,13 +3,11 @@ from decimal import Decimal
 from os import environ
 
 import boto3
-from utils import exception_handler
 
 dynamodb = boto3.resource('dynamodb', region_name='ap-southeast-1')
 loan_table = dynamodb.Table(environ.get('LOAN_DATABASE_NAME'))
 uid_table = dynamodb.Table(environ.get('USER_TRANSACTION_DATABASE_NAME'))
 
-@exception_handler
 def main(event, context):
     """
     Lambda to retrieve all pools, with business logic to segment eligible and ineligible pools
@@ -26,13 +24,7 @@ def main(event, context):
         }
 
     """
-    # body = json.loads(event) # internal invoke no API Gateway body
-    
-    # ---------------
-    # TODO: Integrate with User signup to create account
-    # ---------------
-    # username = body['username']
-    username = "BBB"
+    username = event['username']
     
     user_detail = {
         "username": username,

@@ -18,11 +18,20 @@ resources:
         AttributeDefinitions:
           - AttributeName: uid
             AttributeType: S
+          - AttributeName: username
+            AttributeType: S
         KeySchema:
           - AttributeName: uid
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
         TableName: '${self:service}-${self:custom.stage}'
+        GlobalSecondaryIndexes:
+          - IndexName: username
+            KeySchema:
+              - AttributeName: username
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
 
     # Keep in the AWS Parameter Store for other services to discover
     SSMParameterRouteDataTableArn:

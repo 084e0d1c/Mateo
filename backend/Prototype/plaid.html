@@ -13,9 +13,9 @@
 
   <script>
     const handler = Plaid.create({
-      token: 'link-sandbox-44f6583a-2929-41ed-80f9-691c6ede1874',
+      token: 'link-sandbox-44f6583a-2929-41ed-80f9-691c6ede1874', // Get from backend!
       onSuccess: (public_token, metadata) => {
-        console.log(public_token);
+        console.log(public_token); // Send to backend!
         console.log(metadata);
       },
       onLoad: () => {},

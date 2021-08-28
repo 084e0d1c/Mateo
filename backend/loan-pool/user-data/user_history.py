@@ -1,14 +1,17 @@
 import simplejson as json
-
 import boto3
-from dynamo_utils import check_pool_eligibility
+from boto3.dynamodb.conditions import Key
+from os import environ
 from utils import decode_username, exception_handler
 
+dynamodb = boto3.resource('dynamodb', region_name='ap-southeast-1')
+transaction_table = dynamodb.Table(environ.get('TRANSACTION_HISTORY_DATABASE_NAME'))
+uid_table = dynamodb.Table(environ.get('USER_TRANSACTION_DATABASE_NAME'))
 
 @exception_handler
 def main(event, context):
     """
-    Retrieve a list of a specific pool with business logic
+    Retrieve all of user historical transactions for loans with bank or pool
 
     Args:
         event (dict): API Gateway Format,
@@ -22,18 +25,17 @@ def main(event, context):
         }
     """
     
-    body = json.loads(event['body'])
-    pool_id = body['pool_id']
     username = decode_username(event)
     
-    # Business Logic: Check and add params to indicate eligiblity for loan / deposit
-    pool_detail = check_pool_eligibility(username, pool_id)
+    transaction_details = transaction_table.query(
+        IndexName="username",
+        KeyConditionExpression=Key('username').eq(username))['Items']
     
     return {
         "statusCode": "200",
         "body": json.dumps({
             "message": "success",
-            "body": pool_detail
+            "body": transaction_details
         }),
         "headers": {'Access-Control-Allow-Origin': "*"}
     }

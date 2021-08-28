@@ -9,7 +9,7 @@ from utils import decode_username, exception_handler
 @exception_handler
 def main(event, context):
     """
-    Lambda to retrieve all pools, with business logic to segment eligible and ineligible pools
+    Lambda to retrieve all pools from DynamoDB and return them as a JSON string.
 
     Args:
         event (dict): API Gateway Format,

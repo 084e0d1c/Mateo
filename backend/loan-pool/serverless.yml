@@ -103,6 +103,30 @@ functions:
             arn: ${self:custom.cognitoArn}
             scopes:
               - aws.cognito.signin.user.admin
+  
+  UserProfile:
+    handler: user-data/user_profile.main
+    events:
+      - http:
+          path: /loanpool/user_profile
+          method: get
+          cors: true
+          authorizer:
+            arn: ${self:custom.cognitoArn}
+            scopes:
+              - aws.cognito.signin.user.admin
+
+  UserHistory:
+    handler: user-data/user_history.main
+    events:
+      - http:
+          path: /loanpool/user_history
+          method: get
+          cors: true
+          authorizer:
+            arn: ${self:custom.cognitoArn}
+            scopes:
+              - aws.cognito.signin.user.admin
 
   InitPools:
     handler: setup/create_pools.main
