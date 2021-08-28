@@ -3,11 +3,14 @@ from plaid.api import plaid_api
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+from plaid.model.accounts_get_request import AccountsGetRequest
+
 from plaid.model.country_code import CountryCode
 from plaid.model.products import Products
 
 from secrets_manager import get_plaid_key
 import os
+import ast
 
 CLIENT_ID = "6127c5c51489d0000e28c6aa"
 
@@ -32,6 +35,14 @@ def get_access_token(public_token: str) -> str:
   return exchange_response['access_token']
 
 def get_plaid_link_token(username: str) -> str:
+  """Retrieves plaid link token to initiate plaid UI in frontend
+
+  Args:
+      username (str)
+
+  Returns:
+      str: link_token
+  """
   request = LinkTokenCreateRequest(
     products=[Products('auth'), Products('transactions')],
     client_name='Mateo',
@@ -44,3 +55,16 @@ def get_plaid_link_token(username: str) -> str:
   # create link token
   response = client.link_token_create(request)
   return response['link_token']
+
+def get_plaid_first_account(access_token: str) -> str:
+  """Retrieves first linked bank account from plaid
+
+  Args:
+      access_token (str)
+
+  Returns:
+      dict: https://plaid.com/docs/api/accounts/
+  """
+  request = AccountsGetRequest(access_token=access_token)
+  response = client.accounts_get(request)
+  return ast.literal_eval(response['accounts'][0].__str__())

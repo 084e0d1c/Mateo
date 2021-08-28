@@ -69,6 +69,9 @@ def main(event, context):
         response = db_client.put_item(
             TableName=os.environ['USER_DATABASE_NAME'],
             Item={
+                'email': {
+                    'S': email
+                },
                 'username': {
                     'S': username
                 },

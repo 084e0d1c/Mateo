@@ -66,6 +66,18 @@ functions:
             scopes:
               - aws.cognito.signin.user.admin
 
+  GetUserDetails:
+    handler: get_user_details.main
+    events:
+      - http:
+          path: /user/details
+          method: get
+          cors: true
+          authorizer:
+            arn: ${self:custom.cognitoArn}
+            scopes:
+              - aws.cognito.signin.user.admin
+
 custom:
   stage: ${opt:stage, self:provider.stage}
 
