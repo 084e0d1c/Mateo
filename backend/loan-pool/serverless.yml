@@ -1,0 +1,151 @@
+# Author: @brandontjd
+
+app: mateo-backend
+
+service: mateo-backend-loan-pool
+
+provider:
+  name: aws
+  stage: dev
+  timeout: 10
+  runtime: python3.7
+  region: ap-southeast-1
+  memorySize: 2048
+  logRetentionInDays: 7
+  lambdaHashingVersion: 20201221
+  environment:
+    PYTHON_ENV: ${self:custom.stage}
+    COGNITO_CLIENT_ID: ${self:custom.cognitoClientId}
+    COGNITO_USERPOOL_ID: ${self:custom.cognitoUserpoolId}
+    USER_DATABASE_NAME: ${self:custom.userDatabaseName}
+    TRANSACTION_HISTORY_DATABASE_NAME: ${self:custom.loanPoolDatabaseName}
+    POOL_DATABASE_NAME: ${self:custom.poolDatabaseName}
+    LOAN_DATABASE_NAME: ${self:custom.loanDatabaseName}
+    USER_TRANSACTION_DATABASE_NAME: ${self:custom.userTransactionDatabaseName}
+    USER_DETAIL_LAMBDA: ${self:custom.userDetailLambda}
+    USER_TRANSFER_LAMBDA: ${self:custom.userTransferLambda}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action: '*'
+          Resource: '*'
+
+functions:
+  GetPool:
+    handler: display-pools.get_pool.main
+    events:
+      - http:
+          path: /loanpool/pool
+          method: post
+          cors: true
+          authorizer:
+            arn: ${self:custom.cognitoArn}
+            scopes:
+              - aws.cognito.signin.user.admin
+  
+  GetPools:
+    handler: display-pools.get_pools.main
+    events:
+      - http:
+          path: /loanpool/pools
+          method: get
+          cors: true
+          authorizer:
+            arn: ${self:custom.cognitoArn}
+            scopes:
+              - aws.cognito.signin.user.admin
+
+  Deposit:
+    handler: interactions.deposit.main
+    events:
+      - http:
+          path: /loanpool/deposit
+          method: post
+          cors: true
+          authorizer:
+            arn: ${self:custom.cognitoArn}
+            scopes:
+              - aws.cognito.signin.user.admin
+
+  Loan:
+    handler: interactions.loan.main
+    events:
+      - http:
+          path: /loanpool/loan
+          method: post
+          cors: true
+          authorizer:
+            arn: ${self:custom.cognitoArn}
+            scopes:
+              - aws.cognito.signin.user.admin
+  
+  Redeem:
+    handler: interactions.redeem.main
+    events:
+      - http:
+          path: /loanpool/redeem
+          method: post
+          cors: true
+          authorizer:
+            arn: ${self:custom.cognitoArn}
+            scopes:
+              - aws.cognito.signin.user.admin
+
+  Repay:
+    handler: interactions.repay.main
+    timeout: 900
+    events:
+      - http:
+          path: /loanpool/repay
+          method: post
+          cors: true
+          authorizer:
+            arn: ${self:custom.cognitoArn}
+            scopes:
+              - aws.cognito.signin.user.admin
+
+  InitPools:
+    handler: setup.create_pools.main
+
+  CreateUserLoanProfile:
+    handler: setup.create_user_profile_in_loan.main
+    
+
+  
+custom:
+  stage: ${opt:stage, self:provider.stage}
+
+  # Required for authorizing accessTokens from Cognito
+  cognitoArn: ${ssm:/${self:custom.stage}/cognito/arn}
+  cognitoClientId: ${ssm:/${self:custom.stage}/cognito/clientId}
+
+  # Required for retrieving user details from Cognito
+  cognitoUserpoolId: ${ssm:/${self:custom.stage}/cognito/poolId}
+
+  loanDatabaseName: ${ssm:/${self:custom.stage}/dynamodb/loan/name}
+  loanDatabaseArn: ${ssm:/${self:custom.stage}/dynamodb/loan/arn}
+
+  loanPoolDatabaseName: ${ssm:/${self:custom.stage}/dynamodb/loan_pool_transaction/name}
+  loanPoolDatabaseArn: ${ssm:/${self:custom.stage}/dynamodb/loan_pool_transaction/arn}
+
+  poolDatabaseName: ${ssm:/${self:custom.stage}/dynamodb/pool/name}
+  poolDatabaseArn: ${ssm:/${self:custom.stage}/dynamodb/pool/arn}
+
+  userTransactionDatabaseName: ${ssm:/${self:custom.stage}/dynamodb/user_transaction/name}
+  userTransactionDatabaseArn: ${ssm:/${self:custom.stage}/dynamodb/user_transaction/arn}
+
+  # Pending User Detail side
+  userDetailLambda: ''
+  userTransferLambda: ''
+
+  # Compile non-pure python modules on non-linux OSs via Docker
+  pythonRequirements:
+    dockerizePip: true
+
+plugins:
+  - serverless-python-requirements
+
+package:
+  patterns:
+    - '!node_modules/**'
