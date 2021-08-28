@@ -1,6 +1,7 @@
 import json
 from os import environ
 import boto3
+from decimal import Decimal
 from utils import exception_handler, decode_username
 from internal_lambda_invoke_utils import invoke_transfer_lambda
 from dynamo_utils import get_available_for_redemption, create_transaction_receipt, process_redemption
@@ -25,29 +26,30 @@ def main(event, context):
     
     body = json.loads(event['body'])
 
-    redemption_amount = body['redemption_amount']
+    redemption_amount = Decimal(str(body['redemption_amount']))
     pool_id = body['pool_id']
     
     username = decode_username(event)
     
-    outstanding_contribution = get_available_for_redemption(username, pool_id)
+    # outstanding_contribution = get_available_for_redemption(username, pool_id)
         
-    if not outstanding_contribution or redemption_amount > outstanding_contribution:
-        return {
-            "statusCode": 400,
-            "body": json.dumps({
-                "message": "Insufficient amount for redemption"
-            }),
-            "headers": {'Access-Control-Allow-Origin': "*"}
-        }
+    # if not outstanding_contribution or redemption_amount > outstanding_contribution:
+    #     return {
+    #         "statusCode": 400,
+    #         "body": json.dumps({
+    #             "message": "Insufficient amount for redemption"
+    #         }),
+    #         "headers": {'Access-Control-Allow-Origin': "*"}
+    #     }
     
-    # invoke the transfer API 
-    data = {
-        "amount": redemption_amount,
-        "to": "USER",
-        "username": username
-    }
-    trf_response = invoke_transfer_lambda(data)
+    # # invoke the transfer API 
+    # data = {
+    #     "amount": redemption_amount,
+    #     "to": "USER",
+    #     "username": username
+    # }
+    # trf_response = invoke_transfer_lambda(data)
+    trf_response = {'statusCode':200}
     
     if trf_response['statusCode'] == 200:
         # Log the transaction 

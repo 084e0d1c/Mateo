@@ -1,4 +1,4 @@
-import json
+import simplejson as json
 from os import environ
 
 import boto3

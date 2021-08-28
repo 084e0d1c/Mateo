@@ -1,15 +1,15 @@
 import json
 from os import environ
 import boto3
+from decimal import Decimal
 from utils import exception_handler, decode_username
-from internal_lambda_invoke_utils import invoke_check_balance_lambda, invoke_transfer_lambda, invoke_compute_credit_score_lambda
-
-
+from internal_lambda_invoke_utils import invoke_check_balance_lambda, invoke_transfer_lambda
+from dynamo_utils import create_transaction_receipt, process_repayment
 
 @exception_handler
 def main(event, context):
     """
-    User deposit to pool from their bank account via user transfer lambda
+    User redeem from pool
 
     Args:
         event (dict): API Gateway Format,
@@ -26,50 +26,49 @@ def main(event, context):
     
     body = json.loads(event['body'])
 
-    repayment_amount = body['repayment_amount']
+    repayment_amount = Decimal(str(body['repayment_amount']))
     uid = body['uid']
     
     username = decode_username(event)
     
-    available_balance = invoke_check_balance_lambda({'username': username})
+    # available_balance = invoke_check_balance_lambda({'username': username})
     
-    if available_balance < repayment_amount:
-        return {
-            "statusCode": 400,
-            "body": json.dumps({"error": "Not enough funds available for repayment"}),
-            "headers": {
-                "Access-Control-Allow-Origin": "*"
-            }
-        }
+    # if available_balance < repayment_amount:
+    #     return {
+    #         "statusCode": 400,
+    #         "body": json.dumps({"error": "Not enough funds available for repayment"}),
+    #         "headers": {
+    #             "Access-Control-Allow-Origin": "*"
+    #         }
+    #     }
     
-    # invoke the transfer API 
-    trf_data = {
-        "amount": repayment_amount,
-        "to": "MATEO",
-        "username": username
-    }
+    # # invoke the transfer API 
+    # trf_data = {
+    #     "amount": repayment_amount,
+    #     "to": "MATEO",
+    #     "username": username
+    # }
     
-    response = invoke_transfer_lambda(trf_data)
+    # response = invoke_transfer_lambda(trf_data)
+    response = {'statusCode': 200} 
     
     if response['statusCode'] == 200:
-        # Recrunch credit score computation
-        cred_data = {
-            "username": username,
-        }
-        invoke_compute_credit_score_lambda(cred_data) # Fire and forget
-        
         # Perform the repayment distribution to loaners
-        
+        repayment_details = {
+            "amount": repayment_amount,
+            "uid": uid,
+            "username": username
+        }
+        pool_id = process_repayment(repayment_details)
         
         # Log the successful transaction
-        pool_hist_data = {
-            "username": username,
+        transaction_details = {
+            "transaction_type": "DEBIT",
             "amount": repayment_amount,
-            "credit_debit": "debit",
-            "pool_id": pool_id
+            "pool_id": pool_id,
+            "username": username
         }
-        pool_hist_arn = environ.get('POOL_HIST_LAMBDA')
-        lambda_client.invoke(FunctionName=pool_hist_arn, InvocationType='Event', Payload=json.dumps(pool_hist_data))
+        create_transaction_receipt(transaction_details)
         
         return {
             "statusCode": "200",

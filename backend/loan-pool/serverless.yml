@@ -17,7 +17,6 @@ provider:
     PYTHON_ENV: ${self:custom.stage}
     COGNITO_CLIENT_ID: ${self:custom.cognitoClientId}
     COGNITO_USERPOOL_ID: ${self:custom.cognitoUserpoolId}
-    USER_DATABASE_NAME: ${self:custom.userDatabaseName}
     TRANSACTION_HISTORY_DATABASE_NAME: ${self:custom.loanPoolDatabaseName}
     POOL_DATABASE_NAME: ${self:custom.poolDatabaseName}
     LOAN_DATABASE_NAME: ${self:custom.loanDatabaseName}
@@ -33,7 +32,7 @@ provider:
 
 functions:
   GetPool:
-    handler: display-pools.get_pool.main
+    handler: display-pools/get_pool.main
     events:
       - http:
           path: /loanpool/pool
@@ -45,7 +44,7 @@ functions:
               - aws.cognito.signin.user.admin
   
   GetPools:
-    handler: display-pools.get_pools.main
+    handler: display-pools/get_pools.main
     events:
       - http:
           path: /loanpool/pools
@@ -57,7 +56,7 @@ functions:
               - aws.cognito.signin.user.admin
 
   Deposit:
-    handler: interactions.deposit.main
+    handler: interactions/deposit.main
     events:
       - http:
           path: /loanpool/deposit
@@ -69,7 +68,7 @@ functions:
               - aws.cognito.signin.user.admin
 
   Loan:
-    handler: interactions.loan.main
+    handler: interactions/loan.main
     events:
       - http:
           path: /loanpool/loan
@@ -81,7 +80,7 @@ functions:
               - aws.cognito.signin.user.admin
   
   Redeem:
-    handler: interactions.redeem.main
+    handler: interactions/redeem.main
     events:
       - http:
           path: /loanpool/redeem
@@ -93,7 +92,7 @@ functions:
               - aws.cognito.signin.user.admin
 
   Repay:
-    handler: interactions.repay.main
+    handler: interactions/repay.main
     timeout: 900
     events:
       - http:
@@ -106,12 +105,10 @@ functions:
               - aws.cognito.signin.user.admin
 
   InitPools:
-    handler: setup.create_pools.main
+    handler: setup/create_pools.main
 
   CreateUserLoanProfile:
-    handler: setup.create_user_profile_in_loan.main
-    
-
+    handler: setup/create_user_profile_in_loan.main
   
 custom:
   stage: ${opt:stage, self:provider.stage}

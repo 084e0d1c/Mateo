@@ -2,8 +2,9 @@ import json
 from os import environ
 import boto3
 import jwt
+from decimal import Decimal
 from utils import exception_handler, decode_username
-from dynamo_utils import create_transaction_receipt, get_max_loan, update_user_in_loan_and_pool_balance
+from dynamo_utils import create_transaction_receipt, get_max_loan, update_user_in_loan_and_pool_balance, process_loan
 
 lambda_client = boto3.client('lambda', region_name='ap-southeast-1')
 
@@ -27,31 +28,31 @@ def main(event, context):
     
     body = json.loads(event['body'])
 
-    loan_amount = body['loan_amount']
+    loan_amount = Decimal(str(body['loan_amount']))
     pool_id = body['pool_id']
     username = decode_username(event)
     
-    # check with dynamo if the user has enough credit to take loan
-    available_loan_amount = get_max_loan(username)
-    if loan_amount > available_loan_amount:
-        return {
-            "statusCode": 400,
-            "body": json.dumps({
-                "message": "User has insufficient credit to take loan"
-            }),
-            "headers": {'Access-Control-Allow-Origin': "*"}
-        }
+    # # check with dynamo if the user has enough credit to take loan
+    # available_loan_amount = get_max_loan(username)
+    # if loan_amount > available_loan_amount:
+    #     return {
+    #         "statusCode": 400,
+    #         "body": json.dumps({
+    #             "message": "User has insufficient credit to take loan"
+    #         }),
+    #         "headers": {'Access-Control-Allow-Origin': "*"}
+    #     }
     
-    # invoke the transfer API 
-    data = {
-        "amount": loan_amount,
-        "to": "USER",
-        "username": username
-    }
+    # # invoke the transfer API 
+    # data = {
+    #     "amount": loan_amount,
+    #     "to": "USER",
+    #     "username": username
+    # }
     
-    user_trf_arn = environ.get('USER_TRANSFER_LAMBDA')
-    response = lambda_client.invoke(FunctionName=user_trf_arn, InvocationType='RequestResponse', Payload=json.dumps(data))
-    
+    # user_trf_arn = environ.get('USER_TRANSFER_LAMBDA')
+    # response = lambda_client.invoke(FunctionName=user_trf_arn, InvocationType='RequestResponse', Payload=json.dumps(data))
+    response = {'statusCode':200}
     if response['statusCode'] == 200:
         # if the transfer was successful update 
         # each user available and in_loan
@@ -59,6 +60,7 @@ def main(event, context):
         
         contribution_distribution = update_user_in_loan_and_pool_balance(pool_id, loan_amount)
         
+        process_loan(username, loan_amount)
         
         # update to transaction history database
         transaction_details = {
@@ -67,7 +69,8 @@ def main(event, context):
             "pool_id": pool_id,
             "repaid": False,
             "contribution": contribution_distribution,
-            "repayment_hist": {}
+            "repayment_hist": {},
+            "username": username
         }
         
         create_transaction_receipt(transaction_details)

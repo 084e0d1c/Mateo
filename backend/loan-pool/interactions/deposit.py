@@ -2,7 +2,7 @@ import json
 from os import environ
 
 import boto3
-
+from decimal import Decimal
 from dynamo_utils import (create_transaction_receipt,
                           update_user_pool_contribution)
 from utils import decode_username, exception_handler
@@ -29,33 +29,35 @@ def main(event, context):
     
     body = json.loads(event['body'])
 
-    deposit_amount = body['deposit_amount']
+    deposit_amount = Decimal(str(body['deposit_amount']))
     pool_id = body['pool_id']
     username = decode_username(event)
     
     # check if remaining balance is sufficient for the top up
-    user_detail_arn = environ.get('USER_DETAIL_LAMBDA')
-    user_detail_response = lambda_client.invoke(FunctionName=user_detail_arn, InvocationType='RequestResponse', Payload=json.dumps({"username": username}))
-    user_detail_json = json.loads(user_detail_response)
+    # user_detail_arn = environ.get('USER_DETAIL_LAMBDA')
+    # user_detail_response = lambda_client.invoke(FunctionName=user_detail_arn, InvocationType='RequestResponse', Payload=json.dumps({"username": username}))
+    # user_detail_json = json.loads(user_detail_response)
     
-    if user_detail_json['available_balance'] < deposit_amount:
-        return {
-            "statusCode": 400,
-            "body": json.dumps({"message": "Insufficient funds available"}),
-            "headers": {
-                "Access-Control-Allow-Origin": "*"
-            }
-        }
+    # if user_detail_json['available_balance'] < deposit_amount:
+    #     return {
+    #         "statusCode": 400,
+    #         "body": json.dumps({"message": "Insufficient funds available"}),
+    #         "headers": {
+    #             "Access-Control-Allow-Origin": "*"
+    #         }
+    #     }
     
-    # invoke the transfer API 
-    data = {
-        "amount": deposit_amount,
-        "to": "MATEO",
-        "username": username
-    }
+    # # invoke the transfer API 
+    # data = {
+    #     "amount": deposit_amount,
+    #     "to": "MATEO",
+    #     "username": username
+    # }
     
-    user_trf_arn = environ.get('USER_TRANSFER_LAMBDA')
-    response = lambda_client.invoke(FunctionName=user_trf_arn, InvocationType='RequestResponse', Payload=json.dumps(data))
+    # user_trf_arn = environ.get('USER_TRANSFER_LAMBDA')
+    # response = lambda_client.invoke(FunctionName=user_trf_arn, InvocationType='RequestResponse', Payload=json.dumps(data))
+    
+    response = {'statusCode':200}
     
     if response['statusCode'] == 200:
         # if the transfer was successful update the user loan database and pool db
