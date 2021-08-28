@@ -31,6 +31,7 @@ def main(event, context):
     password = body["password"]
     username = body["username"]
     phone = body["phone"]
+    fullname = body["fullname"]
 
     # Signs up in Cognito
     try:
@@ -77,6 +78,9 @@ def main(event, context):
                 },
                 'phone': {
                     'S': phone
+                },
+                'fullname': {
+                    'S': fullname
                 }
             }
         )   
