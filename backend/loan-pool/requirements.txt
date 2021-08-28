@@ -1,0 +1,5 @@
+# Add requirements as necessary
+# boto3 is present in lambda environment by default
+
+pyjwt
+simplejson

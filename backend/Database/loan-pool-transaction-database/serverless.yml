@@ -1,0 +1,49 @@
+# Author: @yarkhinephyo
+
+app: mateo-backend
+
+service: mateo-backend-loan-pool-transaction-database
+
+provider:
+  name: aws
+  stage: dev
+  region: ap-southeast-1
+  lambdaHashingVersion: 20201221
+
+resources:
+  Resources:
+    LoanPoolTransactionDataTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: uid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: uid
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: '${self:service}-${self:custom.stage}'
+
+    # Keep in the AWS Parameter Store for other services to discover
+    SSMParameterRouteDataTableArn:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Name: /${self:custom.stage}/dynamodb/loan_pool_transaction/arn
+        Type: String
+        Value:
+          Fn::GetAtt:
+            - LoanPoolTransactionDataTable
+            - Arn
+        Tags:
+          Environment: ${self:custom.stage}
+    SSMParameterRouteDataTableName:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Name: /${self:custom.stage}/dynamodb/loan_pool_transaction/name
+        Type: String
+        Value: ${self:resources.Resources.LoanPoolTransactionDataTable.Properties.TableName}
+        Tags:
+          Environment: ${self:custom.stage}
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
