@@ -1,18 +1,18 @@
 import boto3
-\
+
 import os
 import json
 import jwt
 from utils import exception_handler
 
-from plaid_utils import get_access_token, get_plaid_first_account
+from plaid_utils import get_plaid_first_account
 
 db_client = boto3.client('dynamodb')
 
 @exception_handler
 def main(event, context):
   """
-  Retrieves plaid token
+  Gets user details
 
   Args:
       event (dict): API Gateway Format,
@@ -29,32 +29,15 @@ def main(event, context):
   cognito_access_token = event['headers']["Authorization"].split(" ")[1]
   username = jwt.decode(cognito_access_token, options={"verify_signature": False})["username"]
 
-  body = json.loads(event['body'])
-  public_token = body["public_token"]
-
-  # Get access token from plaid
-  plaid_access_token = get_access_token(public_token)
-  # Get first account ID from plaid
-  account_id = get_plaid_first_account(plaid_access_token)['account_id']
-
   try:
-    response = db_client.update_item(
+    response = db_client.get_item(
       TableName=os.environ['USER_DATABASE_NAME'],
       Key={
         'username': {
           'S': username
         }
-      },
-      UpdateExpression='SET access_token = :access_token, account_id = :account_id',
-      ExpressionAttributeValues={
-        ':access_token': {
-          'S': plaid_access_token
-        },
-        ':account_id': {
-          'S': account_id
-        },
       }
-    )   
+    )
   except Exception as err:
     return {
       "statusCode": "400",
@@ -64,10 +47,21 @@ def main(event, context):
       "headers": {'Access-Control-Allow-Origin': "*"}
     }
 
+  user_details_dict = { 
+    key: value["S"] for key, value in response['Item'].items() if key not in ['access_token', 'account_id'] 
+  }
+
+  ## Get plaid linked bank account details
+  if 'access_token' in response['Item']:
+    user_details_dict['plaid_account'] = get_plaid_first_account(response['Item']['access_token']["S"])
+  else:
+    user_details_dict['plaid_account'] = None
+
   return {
     "statusCode": "200",
     "body": json.dumps({
       "message": "success",
+      "data": user_details_dict
     }),
     "headers": {'Access-Control-Allow-Origin': "*"}
   }

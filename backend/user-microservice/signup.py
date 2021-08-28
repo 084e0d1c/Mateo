@@ -31,6 +31,7 @@ def main(event, context):
     password = body["password"]
     username = body["username"]
     phone = body["phone"]
+    fullname = body["fullname"]
 
     # Signs up in Cognito
     try:
@@ -69,11 +70,17 @@ def main(event, context):
         response = db_client.put_item(
             TableName=os.environ['USER_DATABASE_NAME'],
             Item={
+                'email': {
+                    'S': email
+                },
                 'username': {
                     'S': username
                 },
                 'phone': {
                     'S': phone
+                },
+                'fullname': {
+                    'S': fullname
                 }
             }
         )   

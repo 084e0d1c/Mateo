@@ -130,4 +130,9 @@ dmypy.json
 
 node_modules/
 .serverless
+
+**/test.py
+.vscode/
+.DS_Store
+
 mateoenv/

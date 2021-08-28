@@ -7,7 +7,7 @@ service: mateo-backend-user
 provider:
   name: aws
   stage: dev
-  timeout: 10
+  timeout: 15
   runtime: python3.7
   region: ap-southeast-1
   memorySize: 2048
@@ -65,6 +65,21 @@ functions:
             arn: ${self:custom.cognitoArn}
             scopes:
               - aws.cognito.signin.user.admin
+
+  GetUserDetails:
+    handler: get_user_details.main
+    events:
+      - http:
+          path: /user/details
+          method: get
+          cors: true
+          authorizer:
+            arn: ${self:custom.cognitoArn}
+            scopes:
+              - aws.cognito.signin.user.admin
+
+  BankTransfer:
+    handler: bank_transfer.main
 
 custom:
   stage: ${opt:stage, self:provider.stage}

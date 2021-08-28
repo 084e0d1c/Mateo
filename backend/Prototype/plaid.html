@@ -9,14 +9,24 @@
 </head>
 <body>
 
+  <button id="b1" onclick="openLink">Open Plaid Link</button>
+
   <script>
     const handler = Plaid.create({
-      token: 'link-sandbox-571be756-c959-4a61-91b2-29df9db05290',
-      onSuccess: (public_token, metadata) => {},
+      token: 'link-sandbox-44f6583a-2929-41ed-80f9-691c6ede1874',
+      onSuccess: (public_token, metadata) => {
+        console.log(public_token);
+        console.log(metadata);
+      },
       onLoad: () => {},
       onExit: (err, metadata) => {},
       onEvent: (eventName, metadata) => {},
       receivedRedirectUri: null,
+    });
+
+    const button = document.getElementById('b1');
+    button.addEventListener('click', () => {
+      handler.open();
     });
   </script>
   
