@@ -26,7 +26,7 @@ def main(params, context):
         }
   """
   try:
-    assert 'amount' in params and (isinstance(params['amount'], int) or isinstance(params['amount'], float))
+    assert 'amount' in params
     assert 'to' in params and params['to'] in ['MATEO', 'USER']
     assert 'username' in params
 
