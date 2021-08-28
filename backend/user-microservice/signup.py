@@ -5,6 +5,7 @@ import json
 from utils import exception_handler
 from plaid_utils import get_access_token
 
+lambda_client = boto3.client('lambda', region_name='ap-southeast-1')
 cognito_client = boto3.client('cognito-idp', region_name='ap-southeast-1')
 db_client = boto3.client('dynamodb')
 
@@ -93,7 +94,10 @@ def main(event, context):
             "headers": {'Access-Control-Allow-Origin': "*"}
         }
 
-
+    # # Invoke create user loan profile fire-forget
+    create_user_loan_profile_arn = os.environ.get('COMPUTE_USER_LOAN_PROFILE_LAMBDA')
+    lambda_client.invoke(FunctionName=create_user_loan_profile_arn, InvocationType='Event', Payload=json.dumps({ "username": username }))
+    
     return {
         "statusCode": "200",
         "body": json.dumps({
