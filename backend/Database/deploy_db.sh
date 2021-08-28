@@ -1,7 +1,7 @@
 for d in */ ; do
     echo "$d"
     cd $d
-    sls deploy
+    sls deploy --stage dev
     cd ..
     
 done
