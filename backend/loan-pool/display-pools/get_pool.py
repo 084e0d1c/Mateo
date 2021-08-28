@@ -8,7 +8,7 @@ from utils import decode_username, exception_handler
 @exception_handler
 def main(event, context):
     """
-    User remove their original contribution from the pool.
+    Retrieve a list of a specific pool with business logic
 
     Args:
         event (dict): API Gateway Format,
@@ -26,7 +26,7 @@ def main(event, context):
     pool_id = body['pool_id']
     username = decode_username(event)
     
-    # Check for user credit rating
+    # Business Logic: Check and add params to indicate eligiblity for loan / deposit
     pool_detail = check_pool_eligibility(username, pool_id)
     
     return {
