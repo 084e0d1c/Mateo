@@ -47,7 +47,9 @@ def main(event, context):
       "headers": {'Access-Control-Allow-Origin': "*"}
     }
 
-  user_details_dict = { key: value["S"] for key, value in response['Item'].items() if key != 'access_token' }
+  user_details_dict = { 
+    key: value["S"] for key, value in response['Item'].items() if key not in ['access_token', 'account_id'] 
+  }
 
   ## Get plaid linked bank account details
   if 'access_token' in response['Item']:

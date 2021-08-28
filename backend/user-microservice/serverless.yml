@@ -78,6 +78,9 @@ functions:
             scopes:
               - aws.cognito.signin.user.admin
 
+  BankTransfer:
+    handler: bank_transfer.main
+
 custom:
   stage: ${opt:stage, self:provider.stage}
 
@@ -94,6 +97,20 @@ custom:
   # Compile non-pure python modules on non-linux OSs via Docker
   pythonRequirements:
     dockerizePip: true
+
+resources:
+  Resources:
+    SSMParameterBankTransferArn:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Name: /${self:custom.stage}/user/bank-transfer/arn
+        Type: String
+        Value:
+          Fn::GetAtt:
+            - BankTransfer
+            - Arn
+        Tags:
+          Environment: ${self:custom.stage}
 
 plugins:
   - serverless-python-requirements

@@ -5,7 +5,7 @@ import json
 import jwt
 from utils import exception_handler
 
-from plaid_utils import get_access_token
+from plaid_utils import get_access_token, get_plaid_first_account
 
 db_client = boto3.client('dynamodb')
 
@@ -32,6 +32,11 @@ def main(event, context):
   body = json.loads(event['body'])
   public_token = body["public_token"]
 
+  # Get access token from plaid
+  plaid_access_token = get_access_token(public_token)
+  # Get first account ID from plaid
+  account_id = get_plaid_first_account(plaid_access_token)['account_id']
+
   try:
     response = db_client.update_item(
       TableName=os.environ['USER_DATABASE_NAME'],
@@ -40,11 +45,14 @@ def main(event, context):
           'S': username
         }
       },
-      UpdateExpression='SET access_token = :access_token',
+      UpdateExpression='SET access_token = :access_token, account_id: :account_id',
       ExpressionAttributeValues={
         ':access_token': {
-          'S': get_access_token(public_token)
-        }
+          'S': plaid_access_token
+        },
+        ':account_id': {
+          'S': account_id
+        },
       }
     )   
   except Exception as err:

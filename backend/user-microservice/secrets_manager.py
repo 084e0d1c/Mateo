@@ -13,6 +13,15 @@ def get_mateo_plaid_token() -> str:
   mateo_plaid_token_secret_id = os.environ["PYTHON_ENV"] + "/mateo/plaid/token"
   return get_secret_by_key(mateo_plaid_token_secret_id)
 
+def get_mateo_plaid_account_id() -> str:
+  """Retrieves Mateo plaid account id from secrets manager
+
+  Returns:
+      [string]: Plaid account id
+  """
+  mateo_plaid_acc_secret_id = os.environ["PYTHON_ENV"] + "/mateo/plaid/acc"
+  return get_secret_by_key(mateo_plaid_acc_secret_id)
+
 def get_plaid_key() -> str:
   """Retrieves plaid API key from secrets manager
 
