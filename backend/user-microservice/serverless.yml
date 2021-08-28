@@ -7,7 +7,7 @@ service: mateo-backend-user
 provider:
   name: aws
   stage: dev
-  timeout: 10
+  timeout: 15
   runtime: python3.7
   region: ap-southeast-1
   memorySize: 2048
