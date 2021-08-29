@@ -1,0 +1,45 @@
+{
+  "name": "helperexample",
+  "version": "0.0.1",
+  "description": "A Quasar Framework app",
+  "productName": "Helper Example",
+  "cordovaId": "org.helperexample.app",
+  "capacitorId": "",
+  "author": "steventanwc <steven@mggsoftware.com>",
+  "private": true,
+  "scripts": {
+    "test": "echo \"No test specified\" && exit 0"
+  },
+  "dependencies": {
+    "@quasar/extras": "^1.0.0",
+    "animated-number-vue": "^1.0.0",
+    "apexcharts": "^3.28.1",
+    "axios": "^0.18.1",
+    "chart.js": "^3.5.1",
+    "lightweight-charts": "^3.4.0",
+    "quasar": "^1.0.0",
+    "trading-vue-js": "^1.0.2",
+    "vue-aos": "^2.1.0",
+    "vue-apexcharts": "^1.6.2",
+    "vue-chartjs": "^3.5.1",
+    "vue-owl-carousel": "^2.0.3",
+    "vue-qrcode-reader": "^3.0.3",
+    "vue-slick-carousel": "^1.0.6",
+    "vue-svg-gauge": "^1.2.1",
+    "vuelidate": "^0.7.6"
+  },
+  "devDependencies": {
+    "@quasar/app": "^1.0.0",
+    "@vue/cli": "^3.0.1",
+    "node-sass": "^4.14.0",
+    "vue-template-compiler": "^2.6.14"
+  },
+  "engines": {
+    "node": ">= 10.18.1",
+    "npm": ">= 6.13.4",
+    "yarn": ">= 1.21.1"
+  },
+  "browserslist": [
+    "last 1 version, not dead, ie >= 11"
+  ]
+}
