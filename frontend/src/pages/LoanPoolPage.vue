@@ -73,7 +73,7 @@
 
             <div class="flex justify-around items-center q-mx-sm">
               <q-btn
-                :disable="!allData[2].loan"
+                :disable=" allData[2].loan"
                 unelevated
                 label="Borrow From Pool"
                 class="q-mt-md text-white q-py-xs"
@@ -86,7 +86,7 @@
                 to="loanPoolDetailsBorrow/Pool B"
               />
               <q-btn
-              :disable="!allData[2].deposit"
+                :disable="typeof allData[2].deposit == 'undefined' "
                 unelevated
                 label="Contribute To Pool"
                 class="q-mt-md text-white q-py-xs"

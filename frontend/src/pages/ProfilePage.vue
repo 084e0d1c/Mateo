@@ -26,7 +26,7 @@
     <div class="q-mt-md">
       <div class="bg-white">
         <q-list >
-          <q-item clickable v-ripple>
+          <q-item clickable v-ripple @click="openLink">
             <q-item-section avatar>
               <q-icon color="primary" name="las la-university" />
             </q-item-section>
@@ -163,7 +163,7 @@
 </template>
 
 <script>
-
+var axios = require("axios");
 export default {
   data() {
     return {
@@ -180,7 +180,61 @@ export default {
       mic: 8,
     };
   },
-  methods: {},
+  methods: {
+    async openLink(){
+      let token = this.$store.state.LinkToken
+      console.log(token)
+
+      const handler = Plaid.create({
+        token: token, // Get from backend!
+        onSuccess: async (public_token, metadata) => {
+          console.log(public_token); // Send to backend!
+          console.log(metadata);
+
+          var data = JSON.stringify({
+           public_token: public_token
+          });
+          
+
+          var config = {
+            method: "post",
+            url: "https://k9k7c7vvdb.execute-api.ap-southeast-1.amazonaws.com/dev/user/plaid-public-token",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${this.$store.state.AccessToken}`
+            },
+            data: data,
+          };
+
+          try {
+            let response = await axios(config);
+            console.log(response.data);
+
+            // trigger success popup
+
+          } catch (error) {
+            console.log(error);
+
+            // trigger error for sign up popup
+          }
+
+
+        },
+        onLoad: () => {},
+        onExit: (err, metadata) => {},
+        onEvent: (eventName, metadata) => {},
+        receivedRedirectUri: null,
+      });
+
+      handler.open()
+
+
+    }
+  },
+  mounted(){
+    
+
+  }
 };
 </script>
 

@@ -14,7 +14,7 @@
           <div class="q-ml-xs" style="font-size:6.5vw"><animated-number :value="outstandingLoans" :formatValue="formatToPrice" :duration="duration"/></div>
         </div>
 
-        <q-linear-progress rounded size="20px" :value="progress" stripe color="warning" class="q-mt-sm" />
+        <q-linear-progress rounded size="20px" :value="loansProgress" stripe color="warning" class="q-mt-sm" />
         
 
     </div>
@@ -118,6 +118,7 @@ export default {
   data() {
     return {
       outstandingLoans:'',
+      loansProgress:0,
       duration:300,
       progress: 0,
       series: [{
@@ -256,7 +257,7 @@ export default {
 
     var config1 = {
       method: 'get',
-      url: 'https://ks0iqp6qe8.execute-api.ap-southeast-1.amazonaws.com/dev/loanpool/pools',
+      url: 'https://ks0iqp6qe8.execute-api.ap-southeast-1.amazonaws.com/dev/loanpool/user_profile',
       headers: { 
         'Authorization': `Bearer ${this.$store.state.AccessToken}`
       },
@@ -268,7 +269,9 @@ export default {
       console.log(JSON.stringify(response.data.body))
       console.log(response.data.body)
 
-      this.outstandingLoans = response.outsanding_loan_amount
+      this.outstandingLoans = response.data.body.total_loan_oustanding
+      this.loansProgress = response.data.body.pct_repaid/100
+      
     }catch (err){
       console.log(err);
     }

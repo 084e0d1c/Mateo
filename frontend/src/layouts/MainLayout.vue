@@ -109,7 +109,7 @@ export default {
   },
   mounted(){
     // change to login later
-    this.$router.push('/home')
+    this.$router.push('/login')
 
   }
 

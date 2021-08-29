@@ -181,9 +181,9 @@ export default {
   components: {  carousel, AnimatedNumber},
   data() {
     return {
-      bankBalance:36432.15,   //change to empty and dynamic
+      bankBalance:0,   //change to empty and dynamic
       duration:300,
-      outstandingLoans:'',
+      outstandingLoans:0,
       creditRating:''
       
       
@@ -208,7 +208,31 @@ export default {
       console.log(response.data.body)
 
       this.creditRating = response.data.body.credit_rating
-      this.outstandingLoans = response.outsanding_loan_amount
+      this.outstandingLoans = response.data.body.total_loan_oustanding
+      
+    }catch (err){
+      console.log(err);
+    }
+
+    // get bank balance
+    var data = '';
+
+    var config1 = {
+      method: 'get',
+      url: 'https://k9k7c7vvdb.execute-api.ap-southeast-1.amazonaws.com/dev/user/details',
+      headers: { 
+        'Authorization': `Bearer ${this.$store.state.AccessToken}`
+      },
+      data : data
+    };
+
+    try{
+      let response = await axios(config1)
+      console.log(JSON.stringify(response.data))
+      
+      this.bankBalance = response.data.data.plaid_account.balances.available
+
+      
     }catch (err){
       console.log(err);
     }

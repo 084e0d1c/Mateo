@@ -215,14 +215,14 @@
                 <div class="" style="margin-bottom:2vw">You're almost done!</div>
                 <div class="" style="margin-bottom:5vw">Help us set up your profile.</div>
             </div>
-             <q-input v-model="name" label="Full Name" outlined autofocus style="width:70vw">
+             <q-input v-model="signupName" label="Full Name" outlined autofocus style="width:70vw">
               <template v-slot:prepend>
                 <q-icon name="las la-user" size="20px" />
               </template>
             </q-input>
 
 
-            <q-input v-model="phone" type="number" label="Phone Number" outlined autofocus style="width:70vw">
+            <q-input v-model="signupPhone" type="number" label="Phone Number" outlined autofocus style="width:70vw">
               <template v-slot:prepend>
                 <q-icon name="las la-phone" size="20px" />
               </template>
@@ -333,6 +333,7 @@ export default {
         console.log(response.data);
 
         // trigger success popup
+
       } catch (error) {
         console.log(error);
 
@@ -365,7 +366,26 @@ export default {
 
         console.log(this.$store.state.AccessToken);
 
-        this.$router.push("/home");
+        var config = {
+          method: 'get',
+          url: 'https://k9k7c7vvdb.execute-api.ap-southeast-1.amazonaws.com/dev/user/plaid-link-token',
+          headers: { 
+            'Authorization': `Bearer ${this.$store.state.AccessToken}`
+          },
+          data : data
+        }
+
+
+        try{
+          let response = await axios(config);
+          console.log(response.data.data.link_token)
+
+          this.$store.commit("storeLinkToken", response.data.data.link_token);
+          this.$router.push('/home')
+        }catch (err){
+          console.log(err)
+        }
+        
       } catch (error) {
         console.log(error);
         // trigger the invalid username / password popup here
