@@ -140,7 +140,7 @@
     </div>
 
     <!-- bnpl dialog 1 -->
-    <!-- <q-dialog v-model="bnplPopup1">
+    <q-dialog v-model="bnplPopup1">
       <q-card class="q-pa-md">
         <div class="absolute" style="right:2vw;top:2vw">
           <q-btn round flat outline icon="close" v-close-popup />
@@ -151,16 +151,17 @@
 
         <div class="text-center q-mt-md" style="font-size:3.3vw">
           Why spend all your cash at once when you can choose to split the bill at 0% interest? 
+          
 
         </div>
-        <div class="text-center q-my-md" style="font-size:3.3vw; font-weight:600">Spend your cash on things that matter the most.</div>
+        <div class="text-center q-my-md" style="font-size:4.3vw; font-weight:600">Link your bank account now!</div>
 
         
-        <q-btn unelevated label="Count Me In!" class="full-width q-mt-md text-white q-py-xs" no-caps  style="border-radius:5px; background-color:#D9A514"/>
+        <q-btn unelevated label="Link My Bank Account" class="full-width q-mt-md text-white q-py-xs" no-caps  style="border-radius:5px; background-color:#D9A514" to="/profile"/>
 
 
       </q-card>
-    </q-dialog> -->
+    </q-dialog>
 
 
     <!-- bnpl dialog 2 -->
@@ -184,13 +185,15 @@ export default {
       bankBalance:0,   //change to empty and dynamic
       duration:300,
       outstandingLoans:0,
-      creditRating:''
+      creditRating:'',
+      bnplPopup1:false
       
       
     };
   },
   async mounted() {
    console.log(this.$store.state.AccessToken)
+  this.bnplPopup1 = true
     var data = '';
 
     var config1 = {
