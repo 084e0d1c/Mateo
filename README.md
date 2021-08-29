@@ -1,5 +1,10 @@
 # Mateo - Elipsis Tech Series
 
+![image](https://user-images.githubusercontent.com/60478523/131246677-c5fe2469-9731-455b-aa3e-5e0d07d052e5.png)
+
+## About
+A staggering 75% of adults in Southeast Asia are found to be either underbanked or unbanked - and that number is 40% even in Singapore, one of the strongest financial centres of the region. This statistic clearly illustrates how current global financial inclusion rates are far from ideal. Therefore, our team has come up with Mateo, a hybrid cross-platform web application that enables the underbanked to receive greater access to financial services, achieving greater global financial literacy and inclusion through technology.
+
 ## Setup
 ### Backend
 1. Prepare Node.js (14), Python (3.7), Docker Engine, Local [AWS Credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
