@@ -5,6 +5,9 @@
 ## About
 A staggering 75% of adults in Southeast Asia are found to be either underbanked or unbanked - and that number is 40% even in Singapore, one of the strongest financial centres of the region. This statistic clearly illustrates how current global financial inclusion rates are far from ideal. Therefore, our team has come up with Mateo, a hybrid cross-platform web application that enables the underbanked to receive greater access to financial services, achieving greater global financial literacy and inclusion through technology.
 
+## Architecture
+![image](screenshot.md)
+
 ## Setup
 ### Backend
 1. Prepare Node.js (14), Python (3.7), Docker Engine, Local [AWS Credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
@@ -41,4 +44,20 @@ sls deploy --stage dev
 
 cd Mateo/backend/loan-pool
 sls deploy --stage dev
+```
+
+### Frontend
+1. Prepare Node.js (14)
+
+2. Install Quasar
+```
+npm install -g @quasar/cli
+```
+
+3. If using custom backend, replace the endpoints accordingly
+
+4. Run build
+```
+cd Mateo/frontend/
+quasar build
 ```
