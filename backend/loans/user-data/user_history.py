@@ -6,7 +6,6 @@ from utils import decode_username, exception_handler
 
 dynamodb = boto3.resource('dynamodb', region_name='ap-southeast-1')
 transaction_table = dynamodb.Table(environ.get('TRANSACTION_HISTORY_DATABASE_NAME'))
-uid_table = dynamodb.Table(environ.get('USER_TRANSACTION_DATABASE_NAME'))
 
 @exception_handler
 def main(event, context):

@@ -21,8 +21,9 @@ provider:
     POOL_DATABASE_NAME: ${self:custom.poolDatabaseName}
     LOAN_DATABASE_NAME: ${self:custom.loanDatabaseName}
     USER_TRANSACTION_DATABASE_NAME: ${self:custom.userTransactionDatabaseName}
-    USER_DETAIL_LAMBDA: ${self:custom.userDetailLambda}
-    USER_TRANSFER_LAMBDA: ${self:custom.userTransferLambda}
+    BANK_DETAIL_LAMBDA: ${self:custom.bankDetailLambda}
+    BANK_TRANSFER_LAMBDA: ${self:custom.bankTransferLambda}
+    CREDIT_METRIC_LAMBDA: ${self:custom.creditMetricLambda}
   iam:
     role:
       statements:
@@ -56,7 +57,7 @@ functions:
               - aws.cognito.signin.user.admin
 
   Deposit:
-    handler: interactions/deposit.main
+    handler: pool-interactions/deposit.main
     events:
       - http:
           path: /loanpool/deposit
@@ -68,7 +69,7 @@ functions:
               - aws.cognito.signin.user.admin
 
   Loan:
-    handler: interactions/loan.main
+    handler: pool-interactions/loan.main
     events:
       - http:
           path: /loanpool/loan
@@ -80,7 +81,7 @@ functions:
               - aws.cognito.signin.user.admin
   
   Redeem:
-    handler: interactions/redeem.main
+    handler: pool-interactions/redeem.main
     events:
       - http:
           path: /loanpool/redeem
@@ -92,24 +93,12 @@ functions:
               - aws.cognito.signin.user.admin
 
   Repay:
-    handler: interactions/repay.main
+    handler: pool-interactions/repay.main
     timeout: 900
     events:
       - http:
           path: /loanpool/repay
           method: post
-          cors: true
-          authorizer:
-            arn: ${self:custom.cognitoArn}
-            scopes:
-              - aws.cognito.signin.user.admin
-  
-  UserProfile:
-    handler: user-data/user_profile.main
-    events:
-      - http:
-          path: /loanpool/user_profile
-          method: get
           cors: true
           authorizer:
             arn: ${self:custom.cognitoArn}
@@ -128,11 +117,45 @@ functions:
             scopes:
               - aws.cognito.signin.user.admin
 
+  UserProfile:
+    handler: user-data/user_profile.main
+    events:
+      - http:
+          path: /loanpool/user_profile
+          method: get
+          cors: true
+          authorizer:
+            arn: ${self:custom.cognitoArn}
+            scopes:
+              - aws.cognito.signin.user.admin
+
+  LoaningToggle:
+    handler: pool-interactions/loan_toggle.main
+    events:
+      - http:
+          path: /loanpool/toggle_loan
+          method: get
+          cors: true
+          authorizer:
+            arn: ${self:custom.cognitoArn}
+            scopes:
+              - aws.cognito.signin.user.admin
+
+  ComputeCreditMetrics:
+    handler: credit-management/compute_credit_metrics.main
+
   InitPools:
     handler: setup/create_pools.main
 
   CreateUserLoanProfile:
     handler: setup/create_user_profile_in_loan.main
+
+  UpdateInterestRewards:
+    handler: tasks/update_interest_rewards.main
+    events: 
+      - schedule: 
+          rate: cron(0 * ? * * *)
+          enabled: true
   
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -156,9 +179,9 @@ custom:
   userTransactionDatabaseName: ${ssm:/${self:custom.stage}/dynamodb/user_transaction/name}
   userTransactionDatabaseArn: ${ssm:/${self:custom.stage}/dynamodb/user_transaction/arn}
 
-  # Pending User Detail side
-  userDetailLambda: ''
-  userTransferLambda: ''
+  bankDetailLambda: 'mateo-backend-user-${self:custom.stage}-GetUserDetails'
+  bankTransferLambda: 'mateo-backend-user-${self:custom.stage}-BankTransfer'
+  creditMetricLambda: 'mateo-backend-loan-pool-${self:custom.stage}-ComputeCreditMetrics'
 
   # Compile non-pure python modules on non-linux OSs via Docker
   pythonRequirements:

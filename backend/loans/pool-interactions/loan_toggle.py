@@ -1,7 +1,6 @@
-import simplejson as json
-
 import boto3
-from dynamo_utils import check_pool_eligibility
+import simplejson as json
+from dynamo_utils import update_loaning_toggle
 from utils import decode_username, exception_handler
 
 
@@ -23,17 +22,16 @@ def main(event, context):
     """
     
     body = json.loads(event['body'])
-    pool_id = body['pool_id']
     username = decode_username(event)
+    loan_toggle_state = body['loan_toggle_state']
     
-    # Business Logic: Check and add params to indicate eligiblity for loan / deposit
-    pool_detail = check_pool_eligibility(username, pool_id)
+    update_loaning_toggle(username, loan_toggle_state)
     
     return {
         "statusCode": "200",
         "body": json.dumps({
-            "message": "success",
-            "body": pool_detail
+            "message": "Successfully updated loaning toggle",
+            "body": {"loaning_toggle": loan_toggle_state}
         }),
         "headers": {'Access-Control-Allow-Origin': "*"}
     }

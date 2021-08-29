@@ -1,8 +1,5 @@
 import json
 from decimal import Decimal
-from os import environ
-
-import boto3
 from dynamo_utils import create_transaction_receipt, process_repayment
 from internal_lambda_invoke_utils import (invoke_check_balance_lambda,
                                           invoke_transfer_lambda)
@@ -34,26 +31,26 @@ def main(event, context):
     
     username = decode_username(event)
     
-    # available_balance = invoke_check_balance_lambda({'username': username})
+    available_balance = invoke_check_balance_lambda(event)
     
-    # if available_balance < repayment_amount:
-    #     return {
-    #         "statusCode": 400,
-    #         "body": json.dumps({"error": "Not enough funds available for repayment"}),
-    #         "headers": {
-    #             "Access-Control-Allow-Origin": "*"
-    #         }
-    #     }
+    # Business Logic 1: If the user has sufficient balance, then can't repay
+    if available_balance < repayment_amount:
+        return {
+            "statusCode": 400,
+            "body": json.dumps({"message": "Not enough funds available for repayment"}),
+            "headers": {
+                "Access-Control-Allow-Origin": "*"
+            }
+        }
     
-    # # invoke the transfer API 
-    # trf_data = {
-    #     "amount": repayment_amount,
-    #     "to": "MATEO",
-    #     "username": username
-    # }
+    # Initiate Payment
+    trf_data = {
+        "amount": repayment_amount,
+        "to": "MATEO",
+        "username": username
+    }
     
-    # response = invoke_transfer_lambda(trf_data)
-    response = {'statusCode': 200} 
+    response = invoke_transfer_lambda(trf_data)
     
     if response['statusCode'] == 200:
         # Perform the repayment distribution to loaners
@@ -66,7 +63,7 @@ def main(event, context):
         
         # Log the successful transaction
         transaction_details = {
-            "transaction_type": "DEBIT",
+            "transaction_type": "Payment",
             "amount": repayment_amount,
             "pool_id": pool_id,
             "username": username
@@ -76,7 +73,7 @@ def main(event, context):
         return {
             "statusCode": "200",
             "body": json.dumps({
-                "message": "success",
+                "message": "Repayment of Pool Loan Success",
             }),
             "headers": {'Access-Control-Allow-Origin': "*"}
         }
@@ -84,7 +81,7 @@ def main(event, context):
     return {
         "statusCode": 400,
         "body": json.dumps({
-                "message": "fail",
+                "message": "Sorry! There was an issue with the bank. Please try again soon.",
             }),
             "headers": {'Access-Control-Allow-Origin': "*"}
     }

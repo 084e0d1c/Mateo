@@ -1,15 +1,13 @@
-from os import environ
-
 import boto3
 import simplejson as json
-from dynamo_utils import scan_all_pools
+from dynamo_utils import check_pool_eligibility
 from utils import decode_username, exception_handler
 
 
 @exception_handler
 def main(event, context):
     """
-    Lambda to retrieve all pools from DynamoDB and return them as a JSON string.
+    Retrieve a list of a specific pool with business logic
 
     Args:
         event (dict): API Gateway Format,
@@ -21,16 +19,21 @@ def main(event, context):
             "body": <>, 
             "headers": <>
         }
-
     """
-    # Scan the table and return all pools (which there are only 3-4)
-    response = scan_all_pools()
+    
+    body = json.loads(event['body'])
+    pool_id = body['pool_id']
+    username = decode_username(event)
+    
+    # Business Logic: Check and add params to indicate eligiblity for loan / deposit
+    pool_detail = check_pool_eligibility(username, pool_id)
+    del pool_detail['contribution_distribution'] # Mask contributors
     
     return {
         "statusCode": "200",
         "body": json.dumps({
             "message": "success",
-            "body": response
+            "body": pool_detail
         }),
         "headers": {'Access-Control-Allow-Origin': "*"}
     }

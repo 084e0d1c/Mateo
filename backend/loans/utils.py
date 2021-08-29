@@ -32,9 +32,9 @@ def decode_username(event):
 
 @total_ordering
 class CreditRating(Enum):
-    AA = 3
-    BB = 2
-    CC = 1
+    BB = 3
+    CC = 2
+    DD = 1
     
     def __lt__(self, other):
         # We can safely only consider the comparison between
@@ -42,3 +42,5 @@ class CreditRating(Enum):
         if self.__class__ is other.__class__:
             return self.value < other.value
     
+    def __mul__(self, other):
+        return self.value * other
