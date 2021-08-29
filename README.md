@@ -5,6 +5,11 @@
 ## About
 A staggering 75% of adults in Southeast Asia are found to be either underbanked or unbanked - and that number is 40% even in Singapore, one of the strongest financial centres of the region. This statistic clearly illustrates how current global financial inclusion rates are far from ideal. Therefore, our team has come up with Mateo, a hybrid cross-platform web application that enables the underbanked to receive greater access to financial services, achieving greater global financial literacy and inclusion through technology.
 
+## Application
+Mobile-Only website: https://tinyurl.com/mateo-mobile-website
+Retool Admin Dashboard: https://tinyurl.com/mateo-admin-dashboard
+Mobile Build: Refer to submission zip
+
 ## Architecture
 ![image](screenshot.jpg)
 
