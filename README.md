@@ -7,7 +7,9 @@ A staggering 75% of adults in Southeast Asia are found to be either underbanked 
 
 ## Application
 Mobile-Only website: https://tinyurl.com/mateo-mobile-website
+
 Retool Admin Dashboard: https://tinyurl.com/mateo-admin-dashboard
+
 Mobile Build: Refer to submission zip
 
 ## Architecture
