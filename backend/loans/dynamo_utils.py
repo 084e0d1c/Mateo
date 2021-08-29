@@ -222,7 +222,7 @@ def process_loan(username, amount, pool_id):
     if pool_id in user_detail['loans_from_pools']:
         user_detail['loans_from_pools'][pool_id]['in_loan'] += amount
     else:
-        user_detail['loans_from_pools'][pool_id] = {'in_loan': amount, 'repaid': Decimal("0")}
+        user_detail['loans_from_pools'][pool_id] = {'in_loan': amount, 'repaid': Decimal("0"), 'interest_due': Decimal("0")}
     loan_table.put_item(Item=user_detail)
     
 # ---------------
@@ -257,7 +257,12 @@ def process_repayment(repayment_details):
         user_detail['loans_from_pools'][pool_id]['repaid'] += repayment_details['amount']
     else:
         user_detail['loans_from_pools'][pool_id]['repaid'] = repayment_details['amount']
-        
+    
+    # Update pool value to reflect the repayment amount
+    pool_item = pool_table.get_item(Key={'pool_id': pool_id})['Item']
+    pool_item['available_amount'] += repayment_details['amount']
+    pool_table.put_item(Item=pool_item)
+    
     # If user has repaid everything, we clear the thing altogether
     if user_detail['loans_from_pools'][pool_id]['in_loan'] <= Decimal("0"):
         del user_detail['loans_from_pools'][pool_id]
@@ -281,6 +286,13 @@ def repay(username, amount, pool_id):
         
         response = invoke_transfer_lambda(trf_data)
         user_detail['deposits_to_pools'][pool_id]['intial_deposit'] -= amount
+        transaction_details = {
+            "transaction_type": "Withdrawal",
+            "amount": amount,
+            "pool_id": pool_id,
+            "username": username
+        }
+        create_transaction_receipt(transaction_details)
     else:
         # If user don't want to loan anymore, then available should not change
         user_detail['deposits_to_pools'][pool_id]['available'] += amount
