@@ -273,6 +273,24 @@
       </q-card>
     </q-dialog>
 
+     <!-- dialog -->
+    <q-dialog v-model="successDialog">
+      <q-card class="q-pa-sm">
+        <q-card-section>
+          <div class="text-h6">Successful Registration</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          You have succesfully registered for Mateo!
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="OK" color="primary" @click="handleClose()" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+
 
   </q-page>
 </template>
@@ -285,6 +303,7 @@ export default {
       loginPopup: false,
       signupPopup: false,
       signupPopup2:false,
+      successDialog:false,
       isPwd: true,
       username: "",
       password: "",
@@ -307,6 +326,11 @@ export default {
     handleSignUp2Close(){
         this.signupPopup2 = false
         this.signupPopup = true
+    },
+    handleClose(){
+      this.signupPopup = false
+        this.signupPopup2 = false
+        this.successDialog = false
     },
     async signUp() {
 
@@ -333,6 +357,9 @@ export default {
         console.log(response.data);
 
         // trigger success popup
+        this.successDialog = true
+
+
 
       } catch (error) {
         console.log(error);
