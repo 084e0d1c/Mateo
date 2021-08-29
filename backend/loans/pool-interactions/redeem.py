@@ -37,7 +37,7 @@ def main(event, context):
     # Business Logic 1: Check if user has sufficient withdrawable balance
     outstanding_contribution = get_available_for_redemption(username, pool_id)
     
-    if not outstanding_contribution or (redemption_amount + fees) > outstanding_contribution:
+    if not outstanding_contribution or redemption_amount > outstanding_contribution:
         return {
             "statusCode": 400,
             "body": json.dumps({

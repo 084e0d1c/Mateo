@@ -35,8 +35,6 @@ def main(event, context):
     fees = Decimal(str(body['fees']))
     username = decode_username(event)
     
-    
-    
     # Business Logic 1: Check with dynamo if the user has enough credit to take loan
     available_loan_amount, credit_rating = get_max_loan(username)
     pool_credit_rating = get_pool_credit_rating(pool_id)

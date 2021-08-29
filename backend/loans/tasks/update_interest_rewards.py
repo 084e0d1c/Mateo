@@ -31,7 +31,7 @@ def main(event, context):
     for pool in all_pools:
         interest_rates[pool['pool_id']] = pool['interest_rate'] / Decimal('30')
     
-    # Update all user loan rewards
+    # Update all user loan rewards and interest due
     all_users = loan_table.scan()['Items']
     # --------
     # FUTURE_IMPROVEMENT: Improve algorithm to O(n) or some vectorization if possible
@@ -41,7 +41,11 @@ def main(event, context):
             new_interests_yield = interest_rates[pool_id] * user['deposits_to_pools'][pool_id]['in_loan']
             user['deposits_to_pools'][pool_id]['interest_reward'] += new_interests_yield
             user['deposits_to_pools'][pool_id]['available'] += new_interests_yield
-    
-    # Update all user payment required on interest
+        
+        for pool_id in user['loans_from_pools']:
+            interest_due = interest_rates[pool_id] * user['deposits_to_pools'][pool_id]['in_loan']
+            user['loans_from_pools'][pool_id]['interest_due'] = interest_due
+
+        loan_table.put_item(Item=user)
     
     
