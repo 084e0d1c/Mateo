@@ -67,7 +67,7 @@ def main(event, context):
         create_transaction_receipt(transaction_details)
         
         # Update pool amount and loan
-        process_redemption(username, redemption_amount+fees, pool_id)
+        process_redemption(username, redemption_amount, pool_id)
 
         return {
             "statusCode": "200",

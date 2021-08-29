@@ -48,6 +48,9 @@ def scan_all_pools(username):
         # Mask the contribution from requestors
         del pool_detail['contribution_distribution']
         
+        # Min the max loan to either pool balance or user limit
+        pool_detail['max_loan_amount'] = min(pool_detail['max_loan_amount'], pool_detail['available_amount'])
+        
     return all_pools
 
 def check_pool_eligibility(username, pool_id):
@@ -229,7 +232,7 @@ def process_repayment(repayment_details):
     # Get the uid for the repayment to each indivdual that contributed
     transaction_detail = transaction_table.get_item(Key={'uid': repayment_details['uid']})['Item']
     pool_id = transaction_detail['pool_id']
-    weight = repayment_details['amount'] / transaction_detail['amount']
+    weight = repayment_details['amount'] / transaction_detail['remaining_repayment']
     for username, value in transaction_detail['contribution'].items():
         weighted_repayment = value * weight
         repay(username, weighted_repayment, transaction_detail['pool_id'])
@@ -254,6 +257,11 @@ def process_repayment(repayment_details):
         user_detail['loans_from_pools'][pool_id]['repaid'] += repayment_details['amount']
     else:
         user_detail['loans_from_pools'][pool_id]['repaid'] = repayment_details['amount']
+        
+    # If user has repaid everything, we clear the thing altogether
+    if user_detail['loans_from_pools'][pool_id]['in_loan'] <= Decimal("0"):
+        del user_detail['loans_from_pools'][pool_id]
+        
     loan_table.put_item(Item=user_detail)
     invoke_compute_credit_metric_lambda(username)
     return pool_id
@@ -272,11 +280,11 @@ def repay(username, amount, pool_id):
         }
         
         response = invoke_transfer_lambda(trf_data)
+        user_detail['deposits_to_pools'][pool_id]['intial_deposit'] -= amount
     else:
         # If user don't want to loan anymore, then available should not change
         user_detail['deposits_to_pools'][pool_id]['available'] += amount
     
-    user_detail['deposits_to_pools'][pool_id]['in_loan'] -= amount
     loan_table.put_item(Item=user_detail)
 
     

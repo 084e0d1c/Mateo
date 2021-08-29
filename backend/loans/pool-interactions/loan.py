@@ -77,8 +77,9 @@ def main(event, context):
             
     
     # invoke the transfer API 
+    # The user will receive the loan amount less the feess
     data = {
-        "amount": loan_amount,
+        "amount": loan_amount - fees,
         "to": "USER",
         "username": username
     }
@@ -94,7 +95,7 @@ def main(event, context):
         transaction_details = {
             "transaction_type": "Withdrawal",
             "amount": loan_amount,
-            "remaining_repayment": loan_amount + fees,
+            "remaining_repayment": loan_amount,
             "fees": fees,
             "pool_id": pool_id,
             "repaid": False,
